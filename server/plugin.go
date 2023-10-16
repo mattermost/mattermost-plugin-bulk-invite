@@ -5,6 +5,10 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/mattermost/mattermost-plugin-bulk-invite/server/api"
+	"github.com/mattermost/mattermost-plugin-bulk-invite/server/inviter"
+	"github.com/mattermost/mattermost-plugin-bulk-invite/server/kvstore"
+	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
 )
 
@@ -18,11 +22,73 @@ type Plugin struct {
 	// configuration is the active plugin configuration. Consult getConfiguration and
 	// setConfiguration for usage.
 	configuration *configuration
+
+	// HTTP
+	handler *api.Handler
+
+	// botUserID the userID for the user of the bot, used to send messages to channels
+	botUserID string
+
+	// engine the inviter engine to use on bulk invite operations
+	engine *inviter.Engine
 }
 
-// ServeHTTP demonstrates a plugin that handles HTTP requests by greeting the world.
-func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello, world!")
+func (p *Plugin) OnActivate() error {
+	return nil
 }
 
-// See https://developers.mattermost.com/extend/plugins/server/reference/
+func (p *Plugin) OnDeactivate() error {
+	return nil
+}
+
+// OnConfigurationChange is invoked when configuration changes may have been made.
+func (p *Plugin) OnConfigurationChange() error {
+	p.API.LogDebug("config change")
+	var configuration = new(configuration)
+
+	// Load the public configuration fields from the Mattermost server configuration.
+	if err := p.API.LoadPluginConfiguration(configuration); err != nil {
+		return fmt.Errorf("failed to load plugin configuration: %w", err)
+	}
+
+	p.setConfiguration(configuration)
+
+	if err := p.ensureBot(); err != nil {
+		return fmt.Errorf("error ensuring bot is present: %w", err)
+	}
+
+	lockStore := kvstore.NewLockStore(p.API)
+
+	p.engine = inviter.NewEngine(p.API, lockStore, p.botUserID)
+
+	p.handler = api.NewHandler(p.API)
+	api.Init(p.handler, p.engine)
+
+	return nil
+}
+
+func (p *Plugin) ServeHTTP(_ *plugin.Context, w http.ResponseWriter, req *http.Request) {
+	p.handler.ServeHTTP(w, req)
+}
+
+// ensureBot ensures that the bot user is present in the system
+func (p *Plugin) ensureBot() error {
+	p.API.LogDebug("ensuring bot user is present")
+
+	if p.botUserID != "" {
+		return nil
+	}
+
+	botUser := &model.Bot{
+		Username:    "bulk-invite",
+		DisplayName: "Bulk Invite",
+		Description: "Bulk invite bot",
+	}
+
+	botUserID, err := p.API.EnsureBotUser(botUser)
+	if err != nil {
+		return fmt.Errorf("failed to ensure bot account: %w", err)
+	}
+	p.botUserID = botUserID
+	return nil
+}
