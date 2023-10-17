@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/mattermost/mattermost-plugin-bulk-invite/server/api"
-	"github.com/mattermost/mattermost-plugin-bulk-invite/server/inviter"
+	"github.com/mattermost/mattermost-plugin-bulk-invite/server/engine"
 	"github.com/mattermost/mattermost-plugin-bulk-invite/server/kvstore"
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
@@ -30,7 +30,7 @@ type Plugin struct {
 	botUserID string
 
 	// engine the inviter engine to use on bulk invite operations
-	engine *inviter.Engine
+	engine *engine.Engine
 }
 
 func (p *Plugin) OnActivate() error {
@@ -59,7 +59,7 @@ func (p *Plugin) OnConfigurationChange() error {
 
 	lockStore := kvstore.NewLockStore(p.API)
 
-	p.engine = inviter.NewEngine(p.API, lockStore, p.botUserID)
+	p.engine = engine.NewEngine(p.API, lockStore, p.botUserID)
 
 	p.handler = api.NewHandler(p.API)
 	api.Init(p.handler, p.engine)

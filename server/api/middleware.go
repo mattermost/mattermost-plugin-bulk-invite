@@ -3,10 +3,10 @@ package api
 import (
 	"net/http"
 
-	"github.com/mattermost/mattermost-plugin-bulk-invite/server/inviter"
+	"github.com/mattermost/mattermost-plugin-bulk-invite/server/engine"
 )
 
-type HandlerFuncPluginAPI func(w http.ResponseWriter, r *http.Request, engine *inviter.Engine)
+type HandlerFuncPluginAPI func(w http.ResponseWriter, r *http.Request, engine *engine.Engine)
 
 // checkAuthenticatedUser checks the header to ensure that the Mattermost-User-ID header is present.
 func checkAuthenticatedUser(handler http.HandlerFunc) http.HandlerFunc {
@@ -21,7 +21,7 @@ func checkAuthenticatedUser(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func injectInviterEngine(handler HandlerFuncPluginAPI, engine *inviter.Engine) http.HandlerFunc {
+func injectInviterEngine(handler HandlerFuncPluginAPI, engine *engine.Engine) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		handler(w, r, engine)
 	}

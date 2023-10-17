@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/mattermost/mattermost-plugin-bulk-invite/server/inviter"
+	"github.com/mattermost/mattermost-plugin-bulk-invite/server/engine"
 )
 
-func Init(handler *Handler, engine *inviter.Engine) {
+func Init(handler *Handler, engine *engine.Engine) {
 	apiV1Router := handler.Router.PathPrefix("/api/v1").Subrouter()
 	apiV1Router.HandleFunc(
 		"/bulk_invite",
@@ -17,12 +17,12 @@ func Init(handler *Handler, engine *inviter.Engine) {
 }
 
 type bulkInvitePayload struct {
-	ChannelID    string               `json:"channel_id"`
-	InviteToTeam bool                 `json:"invite_to_team"`
-	Users        []inviter.InviteUser `json:"users"`
+	ChannelID    string              `json:"channel_id"`
+	InviteToTeam bool                `json:"invite_to_team"`
+	Users        []engine.InviteUser `json:"users"`
 }
 
-func (h *Handler) apiBulkInviteHandler(w http.ResponseWriter, r *http.Request, engine *inviter.Engine) {
+func (h *Handler) apiBulkInviteHandler(w http.ResponseWriter, r *http.Request, e *engine.Engine) {
 	// userID := GetMattermostUserIDFromRequest(r)
 	userID := "bfswryyw67ntubga5omo9j5e1o"
 
@@ -36,14 +36,14 @@ func (h *Handler) apiBulkInviteHandler(w http.ResponseWriter, r *http.Request, e
 		return
 	}
 
-	inviterConfig := &inviter.Config{
+	engineConfig := &engine.Config{
 		UserID:       userID,
 		ChannelID:    payload.ChannelID,
 		InviteToTeam: payload.InviteToTeam,
 		Users:        payload.Users,
 	}
 
-	if err := engine.StartJob(context.TODO(), inviterConfig); err != nil {
+	if err := e.StartJob(context.TODO(), engineConfig); err != nil {
 		sendResponse(w,
 			withHeader("Content-Type", "application/json"),
 			withStatusCode(http.StatusBadRequest),
