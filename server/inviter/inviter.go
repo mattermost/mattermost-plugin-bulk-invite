@@ -54,9 +54,32 @@ func (e *Engine) onError(config *Config, err error) {
 	})
 }
 
+func (e *Engine) checkPermissionsForUser(config *Config) error {
+	if !e.API.HasPermissionToChannel(config.UserID, config.ChannelID, model.PermissionInviteUser) {
+		return fmt.Errorf("you dont have permission to invite users to this channel")
+	}
+
+	if config.InviteToTeam && !e.API.HasPermissionToTeam(config.UserID, config.channel.TeamId, model.PermissionAddUserToTeam) {
+		return fmt.Errorf("you dont have permission to invite users to this channel")
+	}
+
+	return nil
+}
+
 func (e *Engine) StartJob(ctx context.Context, config *Config) error {
 	if e.lockStore.IsLocked(config.ChannelID) {
 		return fmt.Errorf("a bulk invite operation is already running on this channel")
+	}
+
+	var appErr *model.AppError
+	config.channel, appErr = e.API.GetChannel(config.ChannelID)
+	if appErr != nil {
+		e.API.LogError("error getting channnel information", "channel_id", config.ChannelID, "err", appErr.Error())
+		return fmt.Errorf("error getting channnel information: %w", appErr)
+	}
+
+	if err := e.checkPermissionsForUser(config); err != nil {
+		return fmt.Errorf("insufficient permissions: %s", err.Error())
 	}
 
 	if err := e.lockStore.Lock(config.ChannelID); err != nil {
@@ -70,13 +93,6 @@ func (e *Engine) StartJob(ctx context.Context, config *Config) error {
 
 func (e *Engine) start(_ context.Context, config *Config) {
 	var appErr *model.AppError
-	config.channel, appErr = e.API.GetChannel(config.ChannelID)
-	if appErr != nil {
-		e.API.LogError("error getting channnel information", "channel_id", config.ChannelID, "err", appErr.Error())
-		e.onError(config, appErr)
-		return
-	}
-
 	user, appErr := e.API.GetUser(config.UserID)
 	if appErr != nil {
 		e.API.LogError("error getting user information", "user_id", config.UserID, "err", appErr.Error())
