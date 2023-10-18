@@ -1,0 +1,22 @@
+#bulk-invite-channel-modal {
+    .channel-invite__header {
+        margin-left: 0;
+        padding-left: 0;
+        background-color: transparent;
+    }
+
+    .modal-body {
+        background-color: transparent;
+        padding-left: 2em;
+        padding-right: 2em;
+    }
+
+    .modal-footer {
+        background-color: transparent;
+        border-top: 0;
+    }
+
+    .alert .fa {
+        margin-right: 0.5em;
+    }
+}
