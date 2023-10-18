@@ -58,9 +58,11 @@ export default function BulkInviteChannelForm(props: Props) {
         return response.channel;
     }, []);
 
-    loadChannelInfo(modalProps.channelId).then((channel) => {
-        setChannelName(channel.display_name)
-    });
+    if (!channelName) {
+        loadChannelInfo(modalProps.channelId).then((channel) => {
+            setChannelName(channel.display_name)
+        });
+    }
 
 
     const setFormValue = <Key extends keyof BulkInvitePayload>(name: Key, value: BulkInvitePayload[Key]) => {
@@ -178,10 +180,10 @@ const ActualForm = (props: ActualFormProps) => {
         {
             label: 'Bulk invite file (.JSON format)',
             required: true,
-            inputId: 'bulk-invite-channel-file',
             helpText: <div><a>Download a template</a> to ensure your file formatting is correct.</div>,
             element: (
                 <input
+                    id='bulk-invite-channel-file'
                     onChange={(e) => setFormValue('file', e.target.value)}
                     type='file'
                 />
@@ -190,9 +192,9 @@ const ActualForm = (props: ActualFormProps) => {
         {
             label: 'Invite members to the team if they don’t belong to it',
             required: false,
-            inputId: 'bulk-invite-channel-invite-to-team',
             element: (
                 <input
+                    id='bulk-invite-channel-invite-to-team'
                     onChange={(e) => {
                         setFormValue('invite_to_team', e.target.checked)
                     }}
@@ -208,7 +210,7 @@ const ActualForm = (props: ActualFormProps) => {
             {components.map((c) => (
                 <FormComponentV2
                     {...c}
-                    key={c.inputId}
+                    key={c.element.props.id}
                 ></FormComponentV2>
             ))}
         </div>

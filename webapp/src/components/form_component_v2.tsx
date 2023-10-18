@@ -1,7 +1,6 @@
 import React from 'react';
 
 export type Props = {
-    inputId?: string;
     label: React.ReactNode;
     element: React.ReactElement;
     helpText?: JSX.Element;
@@ -14,31 +13,30 @@ export function FormComponentV2(props: Props) {
     const {
         element,
         helpText,
-        inputId,
         label,
         required,
         hideRequiredStar,
     } = props;
 
+
+
     return (
         <div className='form-group'>
-            {(element.props.type == "checkbox") && element}
-            {label &&
-                <label
-                    className='control-label margin-bottom x2'
-                    htmlFor={inputId}
-                >
-                    {label}
-                </label>
-            }
+            <label
+                className='control-label margin-bottom x2'
+                htmlFor={element.props.id}
+            >
+                {(element.props.type == "checkbox") && element}
+                {label}
             {required && !hideRequiredStar &&
                 <span
-                    className='error-text'
-                    style={{marginLeft: '3px'}}
+                className='error-text'
+                style={{marginLeft: '3px'}}
                 >
                     {'*'}
                 </span>
             }
+            </label>
             <div className='help-text'>
                 {helpText}
             </div>
