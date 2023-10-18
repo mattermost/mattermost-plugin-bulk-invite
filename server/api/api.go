@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/mattermost/mattermost-plugin-bulk-invite/server/engine"
@@ -22,6 +23,18 @@ type bulkInvitePayload struct {
 	Users        []engine.InviteUser `json:"users"`
 }
 
+func (bip *bulkInvitePayload) IsValid() error {
+	if bip.ChannelID == "" {
+		return fmt.Errorf("Missing channel ID")
+	}
+
+	if len(bip.Users) == 0 {
+		return fmt.Errorf("Missing users")
+	}
+
+	return nil
+}
+
 func (h *Handler) apiBulkInviteHandler(w http.ResponseWriter, r *http.Request, e *engine.Engine) {
 	// userID := GetMattermostUserIDFromRequest(r)
 	userID := "bfswryyw67ntubga5omo9j5e1o"
@@ -31,8 +44,12 @@ func (h *Handler) apiBulkInviteHandler(w http.ResponseWriter, r *http.Request, e
 	var payload bulkInvitePayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		h.Logger.LogError("error parsing payload", "err", err.Error())
-		_, _ = w.Write([]byte(err.Error()))
-		sendResponse(w, withStatusCode(http.StatusBadRequest))
+		sendResponse(w, withStatusCode(http.StatusBadRequest), withBody(`{"error": "%s"}`, err.Error()))
+		return
+	}
+
+	if err := payload.IsValid(); err != nil {
+		sendResponse(w, withStatusCode(http.StatusBadRequest), withBody(`{"error": "%s"}`, err.Error()))
 		return
 	}
 
@@ -47,7 +64,7 @@ func (h *Handler) apiBulkInviteHandler(w http.ResponseWriter, r *http.Request, e
 		sendResponse(w,
 			withHeader("Content-Type", "application/json"),
 			withStatusCode(http.StatusBadRequest),
-			withBody(`{"error": "%s"}`, err.Error()),
+			withBody(`{"error": "%s"}`, err.Message()),
 		)
 		return
 	}

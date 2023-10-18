@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/mattermost/mattermost-plugin-bulk-invite/server/kvstore"
+	"github.com/mattermost/mattermost-plugin-bulk-invite/server/perror"
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
 )
@@ -19,9 +20,9 @@ type Engine struct {
 	botUserID string
 }
 
-func (e *Engine) onError(config *Config, err error) {
+func (e *Engine) onError(config *Config, _ error) {
 	e.API.SendEphemeralPost(config.UserID, &model.Post{
-		Message: fmt.Sprintf("Error bulk inviting users. Error provided: \n ```\n%s\n```.\n\n Please check logs for more information.", err.Error()),
+		Message: "⚠️ Error bulk inviting users. Please check logs for more information.",
 	})
 }
 
@@ -37,24 +38,32 @@ func (e *Engine) checkPermissionsForUser(config *Config) error {
 	return nil
 }
 
-func (e *Engine) StartJob(ctx context.Context, config *Config) error {
+func (e *Engine) StartJob(ctx context.Context, config *Config) *perror.PError {
 	if e.lockStore.IsLocked(config.ChannelID) {
-		return fmt.Errorf("a bulk invite operation is already running on this channel")
+		return perror.NewSinglePError(fmt.Errorf("a bulk invite operation is already running on this channel"))
 	}
 
 	var appErr *model.AppError
 	config.channel, appErr = e.API.GetChannel(config.ChannelID)
 	if appErr != nil {
 		e.API.LogError("error getting channnel information", "channel_id", config.ChannelID, "err", appErr.Error())
-		return fmt.Errorf("error getting channnel information: %w", appErr)
+		return perror.NewPError(
+			fmt.Errorf("error getting channel: %w", appErr),
+			fmt.Sprintf("Error getting channel information. Does channel `%s` exist?", config.ChannelID),
+		)
 	}
 
 	if err := e.checkPermissionsForUser(config); err != nil {
-		return fmt.Errorf("insufficient permissions: %s", err.Error())
+		return perror.NewPError(
+			fmt.Errorf("insufficient permissions: %w", err),
+			"Insufficient permissions to invite users to channel",
+		)
 	}
 
 	if err := e.lockStore.Lock(config.ChannelID); err != nil {
-		return fmt.Errorf("internal error locking the operation")
+		return perror.NewInternalServerPError(
+			fmt.Errorf("error locking channel: %w", err),
+		)
 	}
 
 	go e.start(ctx, config)
