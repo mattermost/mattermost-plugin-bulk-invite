@@ -5,6 +5,8 @@ import {Modal} from 'react-bootstrap';
 
 import {getTheme} from 'mattermost-redux/selectors/entities/preferences';
 
+import {Channel} from 'mattermost-redux/types/channels';
+
 import FormButton from '../form_button';
 import Loading from '../loading';
 import FormComponent from '@/components/form_component';
@@ -12,8 +14,7 @@ import {BulkInviteChannelEventResponse, GetChannelResponse, bulkInviteToChannel,
 
 import './bulk_invite_channel_form.scss';
 import {Props as FormComponentV2Props, FormComponentV2} from '../form_component_v2';
-import { getBulkInviteChannelModal } from '@/selectors';
-import { Channel } from 'mattermost-redux/types/channels';
+import {getBulkInviteChannelModal} from '@/selectors';
 
 type Props = {
     close: (e?: Event) => void;
@@ -62,7 +63,7 @@ export default function BulkInviteChannelForm(props: Props) {
 
     if (!channelName) {
         loadChannelInfo(modalProps.channelId).then((channel) => {
-            setChannelName(channel.display_name)
+            setChannelName(channel.display_name);
         });
     }
 
@@ -185,7 +186,7 @@ const ActualForm = (props: ActualFormProps) => {
                     id='bulk-invite-channel-file'
                     onChange={(e) => {
                         if (e.target.files?.length === 1) {
-                            setFormValue('file', e.target.files[0])
+                            setFormValue('file', e.target.files[0]);
                         }
                     }}
                     type='file'
@@ -209,9 +210,10 @@ const ActualForm = (props: ActualFormProps) => {
                 <input
                     id='bulk-invite-channel-invite-to-team'
                     onChange={(e) => {
-                        setFormValue('invite_to_team', e.target.checked)
+                        setFormValue('invite_to_team', e.target.checked);
                     }}
                     value={String(formValues.invite_to_team)}
+
                     // disabled={teamInviteDisabled}
                     type='checkbox'
                 />
@@ -229,7 +231,7 @@ const ActualForm = (props: ActualFormProps) => {
                 <input
                     id='bulk-invite-channel-invite-guests'
                     onChange={(e) => {
-                        setFormValue('invite_guests', e.target.checked)
+                        setFormValue('invite_guests', e.target.checked);
                     }}
                     value={String(formValues.invite_guests)}
                     type='checkbox'
@@ -245,7 +247,7 @@ const ActualForm = (props: ActualFormProps) => {
                 <FormComponentV2
                     {...c}
                     key={c.element.props.id}
-                ></FormComponentV2>
+                />
             ))}
         </div>
     );

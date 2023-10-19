@@ -26,16 +26,16 @@ export function FormComponentV2(props: Props) {
                 className='control-label margin-bottom x2'
                 htmlFor={element.props.id}
             >
-                {(element.props.type == "checkbox") && element}
+                {(element.props.type == 'checkbox') && element}
                 {label}
-            {required && !hideRequiredStar &&
+                {required && !hideRequiredStar &&
                 <span
-                className='error-text'
-                style={{marginLeft: '3px'}}
+                    className='error-text'
+                    style={{marginLeft: '3px'}}
                 >
                     {'*'}
                 </span>
-            }
+                }
             </label>
             {helpText && !element.props.disabled &&
                 <div className='help-text'>
@@ -46,7 +46,7 @@ export function FormComponentV2(props: Props) {
                     {disabledText}
                 </div>}
             <div>
-                {(element.props.type != "checkbox") && element}
+                {(element.props.type != 'checkbox') && element}
             </div>
         </div>
     );

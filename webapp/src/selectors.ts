@@ -1,8 +1,8 @@
-import { getConfig } from 'mattermost-redux/selectors/entities/general';
+import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
-import { PluginId } from './plugin_id';
+import {PluginId} from './plugin_id';
 
-import { ReducerState } from './reducers';
+import {ReducerState} from './reducers';
 
 const getPluginState = (state): ReducerState => state['plugins-' + PluginId] || {};
 

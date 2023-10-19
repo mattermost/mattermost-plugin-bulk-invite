@@ -6,7 +6,7 @@ import {Modal} from 'react-bootstrap';
 import {isBulkInviteChannelModalVisible} from '@/selectors';
 
 import BulkInviteChannelForm from '../forms/bulk_invite_channel_form';
-import { closeBulkInviteChannelModal } from '@/actions';
+import {closeBulkInviteChannelModal} from '@/actions';
 
 type Props = {};
 
@@ -37,7 +37,7 @@ export default function BulkInviteChannelModal(props: Props) {
             onHide={close}
             onExited={close}
         >
-            <Modal.Header closeButton={true}></Modal.Header>
+            <Modal.Header closeButton={true}/>
             {content}
         </Modal>
     );

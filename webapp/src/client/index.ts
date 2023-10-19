@@ -27,7 +27,6 @@ export const doFetchWithResponse = async (url: string, options: Options = {}) =>
     });
 };
 
-
 export const doFormFetchWithResponse = async (url: string, options: Options = {}) => {
     const response = await fetch(url, Client4.getOptions(options));
 

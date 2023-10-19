@@ -2,13 +2,16 @@ import {Store, Action} from 'redux';
 
 import {GlobalState} from '@mattermost/types/lib/store';
 
-import {PluginRegistry} from '@/types/mattermost-webapp';
-import { bulkInvite, checkPost, openBulkInviteChannelModal } from './actions';
-import { PluginId } from './plugin_id';
-import { useEffect } from 'react';
+import PluginRegistry from '@mattermost/webapp/plugins/registry';
+
+import {useEffect} from 'react';
+
+import {Channel, ChannelType} from 'mattermost-redux/types/channels';
+
+import {alwaysShow, openBulkInviteChannelModal} from './actions';
+import {PluginId} from './plugin_id';
 import reducers from './reducers';
 import BulkInviteChannelModal from './components/modals/bulk_invite_modal';
-import { Channel } from 'mattermost-redux/types/channels';
 
 export default class Plugin {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
@@ -17,26 +20,30 @@ export default class Plugin {
 
         const setup = async () => {
             registry.registerChannelHeaderMenuAction(
-                "Bulk invite",
+                'Bulk invite',
                 async (channelID: string) => {
                     store.dispatch(openBulkInviteChannelModal(channelID));
                 },
-                () => { return true },
+                alwaysShow,
             );
 
             if (registry.registerChannelIntroButtonAction) {
                 registry.registerChannelIntroButtonAction(
-                    <i className="icon-account-plus-outline" title="Bulk invite icon"></i>,
+                    <i
+                        className='icon-account-plus-outline'
+                        title='Bulk invite icon'
+                    />,
                     async (channel: Channel) => {
-                        store.dispatch(openBulkInviteChannelModal(channel.id));
+                        if (channel.type === 'O' || channel.type === 'P' || channel.type === 'G') {
+                            store.dispatch(openBulkInviteChannelModal(channel.id));
+                        }
                     },
-                    "Bulk invite users",
+                    'Bulk invite users',
                 );
             }
 
             registry.registerRootComponent(BulkInviteChannelModal);
         };
-
 
         registry.registerRootComponent(() => <SetupUI setup={setup}/>);
     }

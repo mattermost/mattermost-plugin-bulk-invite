@@ -1,11 +1,13 @@
 import Client4 from 'mattermost-redux/client/client4';
 
-import { doFetchWithResponse } from "./client";
-import { getPluginServerRoute } from "./selectors";
-import { getConfig } from 'mattermost-redux/selectors/entities/general';
-import { BulkInvitePayload } from './components/forms/bulk_invite_channel_form';
+import {getConfig} from 'mattermost-redux/selectors/entities/general';
+
+import {Channel} from 'mattermost-redux/types/channels';
+
+import {doFetchWithResponse} from './client';
+import {getPluginServerRoute} from './selectors';
+import {BulkInvitePayload} from './components/forms/bulk_invite_channel_form';
 import action_types from './action_types';
-import { Channel } from 'mattermost-redux/types/channels';
 
 const client = new Client4();
 
@@ -25,8 +27,8 @@ export const getSiteURL = (state: GlobalState): string => {
 };
 
 export const alwaysShow = (postId: string): boolean => {
-    return true
-}
+    return true;
+};
 
 export type BulkInviteChannelEventResponse = {data?: any; error?: string};
 
@@ -34,7 +36,7 @@ export const bulkInviteToChannel = (payload: BulkInvitePayload) => async (dispat
     const state = getState();
     const pluginServerRoute = getPluginServerRoute(state);
 
-    var formData = new FormData();
+    const formData = new FormData();
     formData.append('channel_id', payload.channel_id);
     formData.append('invite_to_team', String(payload.invite_to_team).toLowerCase());
     formData.append('file', payload.file);
@@ -76,7 +78,7 @@ export const getChannelInfo = (channelId: string) => async (dispatch, getState):
 
     try {
         const channel = await client.getChannel(channelId);
-        return {channel: channel, error: null};
+        return {channel, error: null};
     } catch (e) {
         const error = e.message?.error || 'An error occurred while retrieving channel information.';
         return {channel: null, error};
