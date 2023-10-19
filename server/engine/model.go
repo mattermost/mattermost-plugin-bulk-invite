@@ -12,14 +12,48 @@ type InviteUser struct {
 }
 
 type bulkInviteResult struct {
-	invitedUsers    int
-	addedToTeam     int
-	errorUsers      int
-	notInvitedUsers int
+	invitedUsers int
+	addedToTeam  int
+	errorUsers   int
+
+	notInvitedGuest         int
+	notInvitedNonTeamMember int
+}
+
+func (bir *bulkInviteResult) NotInvitedCount() int {
+	return bir.notInvitedGuest + bir.notInvitedNonTeamMember
 }
 
 func (bir bulkInviteResult) String() string {
-	return fmt.Sprintf("%d invited: %d with errors and %d not invited. %d were added to the team.", bir.invitedUsers, bir.errorUsers, bir.notInvitedUsers, bir.addedToTeam)
+	return fmt.Sprintf("%d users were added. %d had errors (check logs) and %d were not invited, %d were added to the team.", bir.invitedUsers, bir.errorUsers, bir.NotInvitedCount(), bir.addedToTeam)
+}
+
+func (bir bulkInviteResult) PrettyString() string {
+	prettyString := "Results:\n"
+
+	prettyString += fmt.Sprintf("- **Total users to invite**: %d\n", bir.invitedUsers)
+
+	if bir.errorUsers > 0 {
+		prettyString += fmt.Sprintf("- **Errors**: %d (check logs)\n", bir.errorUsers)
+	}
+
+	if bir.NotInvitedCount() > 0 {
+		prettyString += fmt.Sprintf("- **Not invited**: %d\n", bir.NotInvitedCount())
+
+		if bir.notInvitedGuest > 0 {
+			prettyString += fmt.Sprintf("  - **Due to being a guest**: %d\n", bir.notInvitedGuest)
+		}
+
+		if bir.notInvitedNonTeamMember > 0 {
+			prettyString += fmt.Sprintf("  - **Due to not being a team member**: %d\n", bir.notInvitedNonTeamMember)
+		}
+	}
+
+	if bir.addedToTeam > 0 {
+		prettyString += fmt.Sprintf("- **Added to team**: %d\n", bir.addedToTeam)
+	}
+
+	return prettyString
 }
 
 type Config struct {

@@ -20,7 +20,7 @@ func Init(handler *Handler, engine *engine.Engine) {
 	handlersRouter := handler.Router.PathPrefix("/handlers").Subrouter()
 	handlersRouter.HandleFunc(
 		"/channel_bulk_invite",
-		injectInviterEngine(handler.channelBulkInviteHandler, engine),
+		checkAuthenticatedUser(injectInviterEngine(handler.channelBulkInviteHandler, engine)),
 	).Methods("POST")
 }
 
@@ -33,12 +33,33 @@ type bulkInvitePayload struct {
 
 func (bip *bulkInvitePayload) IsValid() error {
 	if bip.ChannelID == "" {
-		return fmt.Errorf("Missing channel ID")
+		return perror.NewPError(fmt.Errorf("missing channel_id"), "Channel ID is required.")
 	}
 
 	if len(bip.Users) == 0 {
-		return fmt.Errorf("Missing users")
+		return perror.NewPError(fmt.Errorf("missing users"), "User list is empty.")
 	}
+
+	return nil
+}
+
+func (bip *bulkInvitePayload) FromRequest(r *http.Request) *perror.PError {
+	f, h, err := r.FormFile("file")
+	if err != nil {
+		return perror.NewPError(err, "error parsing file")
+	}
+
+	if h.Header.Get("Content-Type") != "application/json" {
+		return perror.NewPError(fmt.Errorf("invalid content type"), "Invalid file type, only JSON is supported")
+	}
+
+	if err := json.NewDecoder(f).Decode(&bip); err != nil {
+		return perror.NewPError(err, "Error parsing submitted file")
+	}
+
+	bip.ChannelID = r.FormValue("channel_id")
+	bip.InviteToTeam = r.FormValue("invite_to_team") == "true"
+	bip.InviteGuests = r.FormValue("invite_guests") == "true"
 
 	return nil
 }
@@ -80,28 +101,6 @@ func (h *Handler) apiBulkInviteHandler(w http.ResponseWriter, r *http.Request, e
 	sendResponse(w, withStatusCode(http.StatusCreated))
 }
 
-func getPayloadFromFormData(r *http.Request) (*bulkInvitePayload, *perror.PError) {
-	var payload bulkInvitePayload
-
-	f, h, err := r.FormFile("file")
-	if err != nil {
-		return nil, perror.NewPError(err, "error parsing file")
-	}
-
-	if h.Header.Get("Content-Type") != "application/json" {
-		return nil, perror.NewPError(fmt.Errorf("invalid content type"), "Invalid file type, only JSON is supported")
-	}
-
-	if err := json.NewDecoder(f).Decode(&payload); err != nil {
-		return nil, perror.NewPError(err, "Error parsing submitted file")
-	}
-
-	payload.ChannelID = r.FormValue("channel_id")
-	payload.InviteToTeam = r.FormValue("invite_to_team") == "true"
-
-	return &payload, nil
-}
-
 func (h *Handler) channelBulkInviteHandler(w http.ResponseWriter, r *http.Request, e *engine.Engine) {
 	userID := getMattermostUserIDFromRequest(r)
 
@@ -114,8 +113,9 @@ func (h *Handler) channelBulkInviteHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	payload, err := getPayloadFromFormData(r)
-	if err != nil {
+	var payload bulkInvitePayload
+
+	if err := payload.FromRequest(r); err != nil {
 		h.Logger.LogError("error parsing channel bulk invite form payload", "err", err.Error())
 		sendResponse(w,
 			withHeader("Content-Type", "application/json"),

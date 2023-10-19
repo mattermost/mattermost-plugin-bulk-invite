@@ -80,7 +80,7 @@ func (e *Engine) start(_ context.Context, config *Config) {
 		return
 	}
 
-	if _, appErr := e.API.CreatePost(&model.Post{
+	if _, appErr = e.API.CreatePost(&model.Post{
 		ChannelId: config.channel.Id,
 		UserId:    e.botUserID,
 		Message:   fmt.Sprintf("Starting bulk invite of %d users (triggered by @%s)", len(config.Users), user.Username),
@@ -90,13 +90,24 @@ func (e *Engine) start(_ context.Context, config *Config) {
 
 	result := e.inviteUsers(config)
 
-	if _, appErr := e.API.CreatePost(&model.Post{
+	post, appErr := e.API.CreatePost(&model.Post{
 		ChannelId: config.ChannelID,
 		UserId:    e.botUserID,
-		Message:   fmt.Sprintf("Finished bulk inviting users. %s", result),
-	}); appErr != nil {
+		Message:   "Bulk invite process finished.",
+	})
+	if appErr != nil {
 		e.API.LogError("error creating result post in channel", "channel_id", config.ChannelID, "err", appErr.Error())
 		e.onError(config, appErr)
+	}
+
+	if _, err := e.API.CreatePost(&model.Post{
+		ChannelId: config.ChannelID,
+		UserId:    e.botUserID,
+		RootId:    post.Id,
+		Message:   result.PrettyString(),
+	}); err != nil {
+		e.API.LogError("error creating threaded result post in channel", "channel_id", config.ChannelID, "err", err.Error())
+		e.onError(config, err)
 	}
 }
 
@@ -135,7 +146,7 @@ func (e *Engine) invite(userID string, config *Config, result *bulkInviteResult)
 	// Check if user is guest
 	if user.IsGuest() && !config.InviteGuests {
 		e.API.LogInfo("not inviting guest user", "invitee_user_id", userID, "user_id", config.UserID, "channel_id", config.ChannelID)
-		result.notInvitedUsers++
+		result.notInvitedGuest++
 		return nil
 	}
 
@@ -157,7 +168,7 @@ func (e *Engine) invite(userID string, config *Config, result *bulkInviteResult)
 			result.addedToTeam++
 		} else {
 			e.API.LogInfo("not inviting member since it doesn't belong to the team", "invitee_user_id", userID, "user_id", config.UserID, "channel_id", config.ChannelID, "team_id", config.channel.TeamId)
-			result.notInvitedUsers++
+			result.notInvitedNonTeamMember++
 			return nil
 		}
 	}
