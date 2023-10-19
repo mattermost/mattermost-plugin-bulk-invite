@@ -26,14 +26,30 @@ func (e *Engine) onError(config *Config, _ error) {
 	})
 }
 
-func (e *Engine) checkPermissionsForUser(config *Config) error {
-	if !e.API.HasPermissionToChannel(config.UserID, config.ChannelID, model.PermissionInviteUser) {
-		return fmt.Errorf("you dont have permission to invite users to this channel")
+func (e *Engine) checkPermissionsForUser(config *Config) *perror.PError {
+	switch config.channel.Type {
+	case model.ChannelTypePrivate:
+		if !e.API.HasPermissionToChannel(config.UserID, config.ChannelID, model.PermissionManagePrivateChannelMembers) {
+			return perror.NewPError(fmt.Errorf("insufficient_channel_permissions__invite_user"), "You dont have permission to invite users to this channel")
+		}
+	case model.ChannelTypeOpen:
+		if !e.API.HasPermissionToChannel(config.UserID, config.ChannelID, model.PermissionManagePublicChannelMembers) {
+			return perror.NewPError(fmt.Errorf("insufficient_channel_permissions__invite_user"), "You dont have permission to invite users to this channel")
+		}
+	case model.ChannelTypeGroup:
+		if !e.API.HasPermissionToChannel(config.UserID, config.ChannelID, model.PermissionManageCustomGroupMembers) {
+			return perror.NewPError(fmt.Errorf("insufficient_channel_permissions__invite_user"), "You dont have permission to invite users to this channel")
+		}
 	}
 
 	if config.InviteToTeam && !e.API.HasPermissionToTeam(config.UserID, config.channel.TeamId, model.PermissionAddUserToTeam) {
-		return fmt.Errorf("you dont have permission to invite users to this channel")
+		return perror.NewPError(fmt.Errorf("insufficient_team_permissions__invite_user"), "You dont have enough permissions to invite users to this team")
 	}
+
+	// TODO: Invite users to teams
+	// if !e.API.HasPermissionToTeam(config.UserID, config.channel.TeamId, model.PermissionInviteUser) {
+	// 	return perror.NewPError(fmt.Errorf("insufficient_team_permissions__invite_user"), "You dont have permission to invite users to this team")
+	// }
 
 	return nil
 }
@@ -72,6 +88,12 @@ func (e *Engine) StartJob(ctx context.Context, config *Config) *perror.PError {
 }
 
 func (e *Engine) start(_ context.Context, config *Config) {
+	defer func() {
+		if err := e.lockStore.Unlock(config.ChannelID); err != nil {
+			e.API.LogError("error unlocking channel. channel will be automatically unlocked after ttl expired", "channel_id", config.ChannelID, "err", err.Error())
+		}
+	}()
+
 	var appErr *model.AppError
 	user, appErr := e.API.GetUser(config.UserID)
 	if appErr != nil {

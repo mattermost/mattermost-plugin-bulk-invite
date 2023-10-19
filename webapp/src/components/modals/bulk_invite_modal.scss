@@ -16,6 +16,10 @@
         border-top: 0;
     }
 
+    .disabled-text {
+        color: var(--error-text);
+    }
+
     .alert .fa {
         margin-right: 0.5em;
     }

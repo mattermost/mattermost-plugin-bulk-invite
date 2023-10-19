@@ -42,7 +42,7 @@ export default function BulkInviteChannelForm(props: Props) {
 
     const [formValues, setFormValues] = useState<BulkInvitePayload>({
         invite_to_team: false,
-        invite_guests: true,
+        invite_guests: false,
         users: [],
         channel_id: modalProps.channelId,
     });
@@ -65,7 +65,6 @@ export default function BulkInviteChannelForm(props: Props) {
             setChannelName(channel.display_name)
         });
     }
-
 
     const setFormValue = <Key extends keyof BulkInvitePayload>(name: Key, value: BulkInvitePayload[Key]) => {
         setFormValues((values: BulkInvitePayload) => ({
@@ -196,6 +195,11 @@ const ActualForm = (props: ActualFormProps) => {
         {
             label: 'Invite members to the team if they don’t belong to it',
             required: false,
+            disabledText: (
+                <div>
+                    {"You don't have permission to invite users to this team."}
+                </div>
+            ),
             helpText: (
                 <div>
                     {'Enabling this will invite users from other teams to this one if they are present on the file.'}
@@ -208,6 +212,7 @@ const ActualForm = (props: ActualFormProps) => {
                         setFormValue('invite_to_team', e.target.checked)
                     }}
                     value={String(formValues.invite_to_team)}
+                    // disabled={teamInviteDisabled}
                     type='checkbox'
                 />
             ),

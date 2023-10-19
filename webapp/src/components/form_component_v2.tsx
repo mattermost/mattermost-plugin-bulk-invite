@@ -6,6 +6,7 @@ export type Props = {
     helpText?: JSX.Element;
     required?: boolean;
     hideRequiredStar?: boolean;
+    disabledText?: JSX.Element;
     type?: string;
 }
 
@@ -15,10 +16,9 @@ export function FormComponentV2(props: Props) {
         helpText,
         label,
         required,
+        disabledText,
         hideRequiredStar,
     } = props;
-
-
 
     return (
         <div className='form-group'>
@@ -37,9 +37,14 @@ export function FormComponentV2(props: Props) {
                 </span>
             }
             </label>
-            <div className='help-text'>
-                {helpText}
-            </div>
+            {helpText && !element.props.disabled &&
+                <div className='help-text'>
+                    {helpText}
+                </div>}
+            {element.props.disabled && disabledText &&
+                <div className='help-text disabled-text'>
+                    {disabledText}
+                </div>}
             <div>
                 {(element.props.type != "checkbox") && element}
             </div>

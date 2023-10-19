@@ -45,6 +45,9 @@ func (bip *bulkInvitePayload) IsValid() error {
 
 func (bip *bulkInvitePayload) FromRequest(r *http.Request) *perror.PError {
 	f, h, err := r.FormFile("file")
+	if f == nil {
+		return perror.NewPError(fmt.Errorf("missing file"), "File is required.")
+	}
 	if err != nil {
 		return perror.NewPError(err, "error parsing file")
 	}
