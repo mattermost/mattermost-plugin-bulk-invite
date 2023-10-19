@@ -30,3 +30,7 @@ func withBody(body string, args ...any) responseOption {
 		_, _ = w.Write([]byte(fmt.Sprintf(body, args...)))
 	}
 }
+
+func sendInternalServerError(w http.ResponseWriter) {
+	sendResponse(w, withStatusCode(http.StatusInternalServerError), withBody(`{"error": "internal server error"}`))
+}

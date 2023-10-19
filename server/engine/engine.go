@@ -124,6 +124,21 @@ func (e *Engine) inviteMattermostByUsername(config *Config, invitee InviteUser, 
 }
 
 func (e *Engine) invite(userID string, config *Config, result *bulkInviteResult) error {
+	// Get user
+	user, appErr := e.API.GetUser(userID)
+	if appErr != nil {
+		e.API.LogError("error getting user information", "invitee_user_id", userID, "user_id", config.UserID, "channel_id", config.ChannelID, "err", appErr.Error())
+		result.errorUsers++
+		return appErr
+	}
+
+	// Check if user is guest
+	if user.IsGuest() && !config.InviteGuests {
+		e.API.LogInfo("not inviting guest user", "invitee_user_id", userID, "user_id", config.UserID, "channel_id", config.ChannelID)
+		result.notInvitedUsers++
+		return nil
+	}
+
 	// Check team membership
 	teamMembership, appErr := e.API.GetTeamMember(config.channel.TeamId, userID)
 	if appErr != nil && appErr.StatusCode != http.StatusNotFound {
@@ -143,7 +158,7 @@ func (e *Engine) invite(userID string, config *Config, result *bulkInviteResult)
 		} else {
 			e.API.LogInfo("not inviting member since it doesn't belong to the team", "invitee_user_id", userID, "user_id", config.UserID, "channel_id", config.ChannelID, "team_id", config.channel.TeamId)
 			result.notInvitedUsers++
-			return fmt.Errorf("not invited")
+			return nil
 		}
 	}
 

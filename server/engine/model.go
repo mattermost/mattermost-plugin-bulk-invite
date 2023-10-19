@@ -36,6 +36,9 @@ type Config struct {
 	// InviteToTeam invite the users to the team if they do not belong to it
 	InviteToTeam bool
 
+	// InviteGuests invite the guests to the team and channel if they do not belong to it
+	InviteGuests bool
+
 	// inviteToWorkspace invite the users by email to the workspace if they are not registered
 	// inviteToWorkspace bool
 }

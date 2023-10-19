@@ -21,7 +21,8 @@ type Props = {
 
 export type BulkInvitePayload = {
     invite_to_team: boolean;
-    file?: string
+    invite_guests: boolean;
+    file?: File
     users: string[];
     channel_id: string;
 }
@@ -41,6 +42,7 @@ export default function BulkInviteChannelForm(props: Props) {
 
     const [formValues, setFormValues] = useState<BulkInvitePayload>({
         invite_to_team: false,
+        invite_guests: true,
         users: [],
         channel_id: modalProps.channelId,
     });
@@ -174,8 +176,6 @@ type ActualFormProps = {
 const ActualForm = (props: ActualFormProps) => {
     const {formValues, setFormValue} = props;
 
-    const theme = useSelector(getTheme);
-
     const components: FormComponentV2Props[] = [
         {
             label: 'Bulk invite file (.JSON format)',
@@ -184,7 +184,11 @@ const ActualForm = (props: ActualFormProps) => {
             element: (
                 <input
                     id='bulk-invite-channel-file'
-                    onChange={(e) => setFormValue('file', e.target.value)}
+                    onChange={(e) => {
+                        if (e.target.files?.length === 1) {
+                            setFormValue('file', e.target.files[0])
+                        }
+                    }}
                     type='file'
                 />
             ),
@@ -192,6 +196,11 @@ const ActualForm = (props: ActualFormProps) => {
         {
             label: 'Invite members to the team if they don’t belong to it',
             required: false,
+            helpText: (
+                <div>
+                    {'Enabling this will invite users from other teams to this one if they are present on the file.'}
+                </div>
+            ),
             element: (
                 <input
                     id='bulk-invite-channel-invite-to-team'
@@ -200,6 +209,26 @@ const ActualForm = (props: ActualFormProps) => {
                     }}
                     value={String(formValues.invite_to_team)}
                     type='checkbox'
+                />
+            ),
+        },
+        {
+            label: 'Invite guests',
+            required: false,
+            helpText: (
+                <div>
+                    {'Invite guests if they are present on the file. If this is unchecked guests wont be invited to the team if the above setting is not checked.'}
+                </div>
+            ),
+            element: (
+                <input
+                    id='bulk-invite-channel-invite-guests'
+                    onChange={(e) => {
+                        setFormValue('invite_guests', e.target.checked)
+                    }}
+                    value={String(formValues.invite_guests)}
+                    type='checkbox'
+                    checked={formValues.invite_guests}
                 />
             ),
         },

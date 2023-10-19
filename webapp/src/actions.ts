@@ -34,12 +34,14 @@ export const bulkInviteToChannel = (payload: BulkInvitePayload) => async (dispat
     const state = getState();
     const pluginServerRoute = getPluginServerRoute(state);
 
-    return doFetchWithResponse(`${pluginServerRoute}/api/v1/bulk_invite`, {
+    var formData = new FormData();
+    formData.append('channel_id', payload.channel_id);
+    formData.append('invite_to_team', String(payload.invite_to_team).toLowerCase());
+    formData.append('file', payload.file);
+
+    return doFetchWithResponse(`${pluginServerRoute}/handlers/channel_bulk_invite`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+        body: formData,
     }).
         then((data) => {
             return {data};

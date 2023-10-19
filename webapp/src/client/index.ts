@@ -26,3 +26,23 @@ export const doFetchWithResponse = async (url: string, options: Options = {}) =>
         url,
     });
 };
+
+
+export const doFormFetchWithResponse = async (url: string, options: Options = {}) => {
+    const response = await fetch(url, Client4.getOptions(options));
+
+    const data = await response.json();
+
+    if (response.ok) {
+        return {
+            response,
+            data,
+        };
+    }
+
+    throw new ClientError(Client4.url, {
+        message: data || '',
+        status_code: response.status,
+        url,
+    });
+};

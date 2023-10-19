@@ -11,11 +11,11 @@ type HandlerFuncPluginAPI func(w http.ResponseWriter, r *http.Request, engine *e
 // checkAuthenticatedUser checks the header to ensure that the Mattermost-User-ID header is present.
 func checkAuthenticatedUser(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// mattermostUserID := getMattermostUserIDFromRequest(r)
-		// if mattermostUserID == "" {
-		// 	sendResponse(w, withStatusCode(http.StatusForbidden))
-		// 	return
-		// }
+		mattermostUserID := getMattermostUserIDFromRequest(r)
+		if mattermostUserID == "" {
+			sendResponse(w, withStatusCode(http.StatusForbidden))
+			return
+		}
 
 		handler(w, r)
 	}

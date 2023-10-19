@@ -8,6 +8,7 @@ import { PluginId } from './plugin_id';
 import { useEffect } from 'react';
 import reducers from './reducers';
 import BulkInviteChannelModal from './components/modals/bulk_invite_modal';
+import { Channel } from 'mattermost-redux/types/channels';
 
 export default class Plugin {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
@@ -22,6 +23,17 @@ export default class Plugin {
                 },
                 () => { return true },
             );
+
+            if (registry.registerChannelIntroButtonAction) {
+                registry.registerChannelIntroButtonAction(
+                    <i className="icon-account-plus-outline" title="Bulk invite icon"></i>,
+                    async (channel: Channel) => {
+                        store.dispatch(openBulkInviteChannelModal(channel.id));
+                    },
+                    "Bulk invite users",
+                );
+            }
+
             registry.registerRootComponent(BulkInviteChannelModal);
         };
 

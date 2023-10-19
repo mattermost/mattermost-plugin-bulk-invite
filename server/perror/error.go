@@ -3,12 +3,15 @@ package perror
 const internalServerError = "Internal error, please check logs"
 
 type PError struct {
-	ErrorMessage string `json:"error_message"`
+	ErrorMessage string
 	err          error
 }
 
 func (e *PError) Error() string {
-	return e.err.Error()
+	if e.err == nil {
+		return e.err.Error()
+	}
+	return ""
 }
 
 func (e *PError) String() string {
@@ -17,6 +20,10 @@ func (e *PError) String() string {
 
 func (e *PError) Message() string {
 	return e.ErrorMessage
+}
+
+func (e *PError) AsJSON() string {
+	return `{"error": "` + e.Message() + `"}`
 }
 
 func NewPError(err error, message string) *PError {
