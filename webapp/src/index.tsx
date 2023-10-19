@@ -27,20 +27,21 @@ export default class Plugin {
                 alwaysShow,
             );
 
-            if (registry.registerChannelIntroButtonAction) {
-                registry.registerChannelIntroButtonAction(
-                    <i
-                        className='icon-account-plus-outline'
-                        title='Bulk invite icon'
-                    />,
-                    async (channel: Channel) => {
-                        if (channel.type === 'O' || channel.type === 'P' || channel.type === 'G') {
-                            store.dispatch(openBulkInviteChannelModal(channel.id));
-                        }
-                    },
-                    'Bulk invite users',
-                );
-            }
+            // NOTE(fmartingr): This is showing up in every channel type (including DMs) and we can't filter it out, so we are not using it for now.
+            // if (registry.registerChannelIntroButtonAction) {
+            //     registry.registerChannelIntroButtonAction(
+            //         <i
+            //             className='icon-account-plus-outline'
+            //             title='Bulk invite icon'
+            //         />,
+            //         async (channel: Channel) => {
+            //             if (channel.type === 'O' || channel.type === 'P' || channel.type === 'G') {
+            //                 store.dispatch(openBulkInviteChannelModal(channel.id));
+            //             }
+            //         },
+            //         'Bulk invite users',
+            //     );
+            // }
 
             registry.registerRootComponent(BulkInviteChannelModal);
         };
