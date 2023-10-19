@@ -180,7 +180,7 @@ const ActualForm = (props: ActualFormProps) => {
         {
             label: 'Bulk invite file (.JSON format)',
             required: true,
-            helpText: <div><a>Download a template</a> to ensure your file formatting is correct.</div>,
+            helpText: <div><a href='https://github.com/mattermost/mattermost-plugin-bulk-invite/blob/master/.readme/template.jsonc' target='_blank'>Download a template</a> to ensure your file formatting is correct.</div>,
             element: (
                 <input
                     id='bulk-invite-channel-file'

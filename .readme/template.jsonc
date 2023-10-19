@@ -1,0 +1,10 @@
+{
+    "users": [
+        {
+            // Only one field is required here, user_id takes preference over username if both are provided
+            // One entry per user
+            "user_id": "user1_id",
+            "username": "user1"
+        }
+    ]
+}
