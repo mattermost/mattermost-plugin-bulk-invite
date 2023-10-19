@@ -3,13 +3,10 @@ import {useSelector, useDispatch} from 'react-redux';
 
 import {Modal} from 'react-bootstrap';
 
-import {getTheme} from 'mattermost-redux/selectors/entities/preferences';
-
 import {Channel} from 'mattermost-redux/types/channels';
 
 import FormButton from '../form_button';
 import Loading from '../loading';
-import FormComponent from '@/components/form_component';
 import {BulkInviteChannelEventResponse, GetChannelResponse, bulkInviteToChannel, getChannelInfo} from '@/actions';
 
 import './bulk_invite_channel_form.scss';
@@ -178,7 +175,7 @@ const ActualForm = (props: ActualFormProps) => {
 
     const components: FormComponentV2Props[] = [
         {
-            label: 'Bulk invite file (.JSON format)',
+            label: 'File (.JSON format)',
             required: true,
             helpText: <div><a href='https://github.com/mattermost/mattermost-plugin-bulk-invite/blob/master/.readme/template.jsonc' target='_blank'>Download a template</a> to ensure your file formatting is correct.</div>,
             element: (
@@ -194,16 +191,16 @@ const ActualForm = (props: ActualFormProps) => {
             ),
         },
         {
-            label: 'Invite members to the team if they don’t belong to it',
+            label: 'Add existing members to the team if they don’t belong to it',
             required: false,
             disabledText: (
                 <div>
-                    {"You don't have permission to invite users to this team."}
+                    {"You don't have permission to add users to this team."}
                 </div>
             ),
             helpText: (
                 <div>
-                    {'Enabling this will invite users from other teams to this one if they are present on the file.'}
+                    {'Enabling this will add users from other teams to this one if they are present on the file.'}
                 </div>
             ),
             element: (
@@ -220,11 +217,11 @@ const ActualForm = (props: ActualFormProps) => {
             ),
         },
         {
-            label: 'Invite guests',
+            label: 'Add guests',
             required: false,
             helpText: (
                 <div>
-                    {'Invite guests if they are present on the file. If this is unchecked guests wont be invited to the team if the above setting is not checked.'}
+                    {'Add guests if they are present on the file. If this is unchecked guests wont be added to the team if the above setting is not checked.'}
                 </div>
             ),
             element: (
