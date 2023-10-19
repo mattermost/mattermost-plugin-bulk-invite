@@ -57,3 +57,6 @@ After successful installation:
 
 
 ## Contribute
+
+If you would like to help improve this plugin, feel free to submit a pull request.
+You can also check for open issues and see if there's anything you can help with.
