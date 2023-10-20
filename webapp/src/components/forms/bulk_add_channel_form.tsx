@@ -7,25 +7,25 @@ import {Channel} from 'mattermost-redux/types/channels';
 
 import FormButton from '../form_button';
 import Loading from '../loading';
-import {BulkInviteChannelEventResponse, GetChannelResponse, bulkInviteToChannel, getChannelInfo} from '@/actions';
+import {BulkAddChannelEventResponse, GetChannelResponse, bulkAddToChannel, getChannelInfo} from '@/actions';
 
-import './bulk_invite_channel_form.scss';
-import {Props as FormComponentV2Props, FormComponentV2} from '../form_component_v2';
-import {getBulkInviteChannelModal} from '@/selectors';
+import './bulk_add_channel_form.scss';
+import {Props as FormComponentProps, FormComponent} from '../form_component';
+import {getBulkAddChannelModal as getBulkAddChannelModal} from '@/selectors';
 
 type Props = {
     close: (e?: Event) => void;
 };
 
-export type BulkInvitePayload = {
-    invite_to_team: boolean;
-    invite_guests: boolean;
+export type BulkAddChannelPayload = {
+    add_to_team: boolean;
+    add_guests: boolean;
     file?: File
     users: string[];
     channel_id: string;
 }
 
-export default function BulkInviteChannelForm(props: Props) {
+export default function BulkAddChannelForm(props: Props) {
     const [storedError, setStoredError] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -33,14 +33,14 @@ export default function BulkInviteChannelForm(props: Props) {
 
     const dispatch = useDispatch();
 
-    const modalProps = useSelector(getBulkInviteChannelModal);
+    const modalProps = useSelector(getBulkAddChannelModal);
     if (modalProps === null || modalProps.channelId === null) {
         return null;
     }
 
-    const [formValues, setFormValues] = useState<BulkInvitePayload>({
-        invite_to_team: false,
-        invite_guests: false,
+    const [formValues, setFormValues] = useState<BulkAddChannelPayload>({
+        add_to_team: false,
+        add_guests: false,
         users: [],
         channel_id: modalProps.channelId,
     });
@@ -64,8 +64,8 @@ export default function BulkInviteChannelForm(props: Props) {
         });
     }
 
-    const setFormValue = <Key extends keyof BulkInvitePayload>(name: Key, value: BulkInvitePayload[Key]) => {
-        setFormValues((values: BulkInvitePayload) => ({
+    const setFormValue = <Key extends keyof BulkAddChannelPayload>(name: Key, value: BulkAddChannelPayload[Key]) => {
+        setFormValues((values: BulkAddChannelPayload) => ({
             ...values,
             [name]: value,
         }));
@@ -91,7 +91,7 @@ export default function BulkInviteChannelForm(props: Props) {
 
         setSubmitting(true);
 
-        const response = (await dispatch(bulkInviteToChannel(formValues))) as BulkInviteChannelEventResponse;
+        const response = (await dispatch(bulkAddToChannel(formValues))) as BulkAddChannelEventResponse;
         if (response.error) {
             handleError(response.error);
             return;
@@ -116,7 +116,7 @@ export default function BulkInviteChannelForm(props: Props) {
                 saving={submitting}
                 disabled={disableSubmit}
             >
-                {'Invite'}
+                {'Start'}
             </FormButton>
         </React.Fragment>
     );
@@ -153,7 +153,7 @@ export default function BulkInviteChannelForm(props: Props) {
         >
             <Modal.Body >
                 <div className='channel-invite__header'>
-                    <h1>{'Bulk invite to ' + channelName}</h1>
+                    <h1>{'Bulk add to ' + channelName}</h1>
                 </div>
                 {error}
                 {form}
@@ -166,21 +166,21 @@ export default function BulkInviteChannelForm(props: Props) {
 }
 
 type ActualFormProps = {
-    formValues: BulkInvitePayload;
-    setFormValue: <Key extends keyof BulkInvitePayload>(name: Key, value: BulkInvitePayload[Key]) => Promise<{ error?: string }>;
+    formValues: BulkAddChannelPayload;
+    setFormValue: <Key extends keyof BulkAddChannelPayload>(name: Key, value: BulkAddChannelPayload[Key]) => Promise<{ error?: string }>;
 }
 
 const ActualForm = (props: ActualFormProps) => {
     const {formValues, setFormValue} = props;
 
-    const components: FormComponentV2Props[] = [
+    const components: FormComponentProps[] = [
         {
             label: 'File (.JSON format)',
             required: true,
             helpText: <div><a href='https://github.com/mattermost/mattermost-plugin-bulk-invite/blob/master/.readme/template.jsonc' target='_blank'>Download a template</a> to ensure your file formatting is correct.</div>,
             element: (
                 <input
-                    id='bulk-invite-channel-file'
+                    id='bulk-add-channel-file'
                     onChange={(e) => {
                         if (e.target.files?.length === 1) {
                             setFormValue('file', e.target.files[0]);
@@ -205,13 +205,13 @@ const ActualForm = (props: ActualFormProps) => {
             ),
             element: (
                 <input
-                    id='bulk-invite-channel-invite-to-team'
+                    id='bulk-add-channel-adde-to-team'
                     onChange={(e) => {
-                        setFormValue('invite_to_team', e.target.checked);
+                        setFormValue('add_to_team', e.target.checked);
                     }}
-                    value={String(formValues.invite_to_team)}
+                    value={String(formValues.add_to_team)}
 
-                    // disabled={teamInviteDisabled}
+                    // disabled={teamAddDisabled}
                     type='checkbox'
                 />
             ),
@@ -226,22 +226,22 @@ const ActualForm = (props: ActualFormProps) => {
             ),
             element: (
                 <input
-                    id='bulk-invite-channel-invite-guests'
+                    id='bulk-add-channel-add-guests'
                     onChange={(e) => {
-                        setFormValue('invite_guests', e.target.checked);
+                        setFormValue('add_guests', e.target.checked);
                     }}
-                    value={String(formValues.invite_guests)}
+                    value={String(formValues.add_guests)}
                     type='checkbox'
-                    checked={formValues.invite_guests}
+                    checked={formValues.add_guests}
                 />
             ),
         },
     ];
 
     return (
-        <div className='bulk-invite-channel-form'>
+        <div className='bulk-add-channel-form'>
             {components.map((c) => (
-                <FormComponentV2
+                <FormComponent
                     {...c}
                     key={c.element.props.id}
                 />

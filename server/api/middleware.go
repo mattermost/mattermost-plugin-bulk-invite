@@ -21,7 +21,7 @@ func checkAuthenticatedUser(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func injectInviterEngine(handler HandlerFuncPluginAPI, engine *engine.Engine) http.HandlerFunc {
+func injectEngine(handler HandlerFuncPluginAPI, engine *engine.Engine) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		handler(w, r, engine)
 	}

@@ -29,7 +29,7 @@ type Plugin struct {
 	// botUserID the userID for the user of the bot, used to send messages to channels
 	botUserID string
 
-	// engine the inviter engine to use on bulk invite operations
+	// engine the engine to use on bulk operations
 	engine *engine.Engine
 }
 

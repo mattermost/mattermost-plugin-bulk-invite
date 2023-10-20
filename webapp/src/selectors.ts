@@ -21,6 +21,6 @@ export const getPluginServerRoute = (state) => {
     return basePath + '/plugins/' + PluginId;
 };
 
-export const isBulkInviteChannelModalVisible = (state) => getPluginState(state).bulkInviteChannelModalVisible;
+export const isBulkAddChannelModalVisible = (state) => getPluginState(state).bulkAddChannelModalVisible;
 
-export const getBulkInviteChannelModal = (state) => getPluginState(state).bulkInviteChannelModal;
+export const getBulkAddChannelModal = (state) => getPluginState(state).bulkAddChannelModal;

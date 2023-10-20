@@ -30,20 +30,20 @@ func (e *Engine) checkPermissionsForUser(config *Config) *perror.PError {
 	switch config.channel.Type {
 	case model.ChannelTypePrivate:
 		if !e.API.HasPermissionToChannel(config.UserID, config.ChannelID, model.PermissionManagePrivateChannelMembers) {
-			return perror.NewPError(fmt.Errorf("insufficient_channel_permissions__invite_user"), "You dont have permission to invite users to this channel")
+			return perror.NewPError(fmt.Errorf("insufficient_private_channel_permissions__add_user"), "You dont have permission to add users to this channel")
 		}
 	case model.ChannelTypeOpen:
 		if !e.API.HasPermissionToChannel(config.UserID, config.ChannelID, model.PermissionManagePublicChannelMembers) {
-			return perror.NewPError(fmt.Errorf("insufficient_channel_permissions__invite_user"), "You dont have permission to invite users to this channel")
+			return perror.NewPError(fmt.Errorf("insufficient_public_channel_permissions__add_user"), "You dont have permission to add users to this channel")
 		}
 	case model.ChannelTypeGroup:
 		if !e.API.HasPermissionToChannel(config.UserID, config.ChannelID, model.PermissionManageCustomGroupMembers) {
-			return perror.NewPError(fmt.Errorf("insufficient_channel_permissions__invite_user"), "You dont have permission to invite users to this channel")
+			return perror.NewPError(fmt.Errorf("insufficient_group_channel_permissions__add_user"), "You dont have permission to add users to this channel")
 		}
 	}
 
-	if config.InviteToTeam && !e.API.HasPermissionToTeam(config.UserID, config.channel.TeamId, model.PermissionAddUserToTeam) {
-		return perror.NewPError(fmt.Errorf("insufficient_team_permissions__invite_user"), "You dont have enough permissions to invite users to this team")
+	if config.AddToTeam && !e.API.HasPermissionToTeam(config.UserID, config.channel.TeamId, model.PermissionAddUserToTeam) {
+		return perror.NewPError(fmt.Errorf("insufficient_team_permissions__add_user"), "You dont have enough permissions to add users to this team")
 	}
 
 	// TODO: Invite users to teams
@@ -56,7 +56,7 @@ func (e *Engine) checkPermissionsForUser(config *Config) *perror.PError {
 
 func (e *Engine) StartJob(ctx context.Context, config *Config) *perror.PError {
 	if e.lockStore.IsLocked(config.ChannelID) {
-		return perror.NewSinglePError(fmt.Errorf("a bulk invite operation is already running on this channel"))
+		return perror.NewPError(fmt.Errorf("channel_locked"), "A bulk operation is already running on this channel. Please wait until it finishes.")
 	}
 
 	var appErr *model.AppError
@@ -72,7 +72,7 @@ func (e *Engine) StartJob(ctx context.Context, config *Config) *perror.PError {
 	if err := e.checkPermissionsForUser(config); err != nil {
 		return perror.NewPError(
 			fmt.Errorf("insufficient permissions: %w", err),
-			"Insufficient permissions to invite users to channel",
+			"Insufficient permissions to add users to channel",
 		)
 	}
 
@@ -105,17 +105,17 @@ func (e *Engine) start(_ context.Context, config *Config) {
 	if _, appErr = e.API.CreatePost(&model.Post{
 		ChannelId: config.channel.Id,
 		UserId:    e.botUserID,
-		Message:   fmt.Sprintf("Starting bulk invite of %d users (triggered by @%s)", len(config.Users), user.Username),
+		Message:   fmt.Sprintf("Starting bulk add of %d users (triggered by @%s)", len(config.Users), user.Username),
 	}); appErr != nil {
 		e.API.LogError("error creating initial post in channel", "channel_id", config.ChannelID, "err", appErr.Error())
 	}
 
-	result := e.inviteUsers(config)
+	result := e.addUsersToChannel(config)
 
 	post, appErr := e.API.CreatePost(&model.Post{
 		ChannelId: config.ChannelID,
 		UserId:    e.botUserID,
-		Message:   "Bulk invite process finished.",
+		Message:   "Bulk add process finished.",
 	})
 	if appErr != nil {
 		e.API.LogError("error creating result post in channel", "channel_id", config.ChannelID, "err", appErr.Error())
@@ -133,92 +133,92 @@ func (e *Engine) start(_ context.Context, config *Config) {
 	}
 }
 
-func (e *Engine) inviteMattermostByUserID(config *Config, invitee InviteUser, result *bulkInviteResult) error {
-	if err := e.invite(invitee.UserID, config, result); err != nil {
+func (e *Engine) addUserToChannelByUserID(config *Config, u AddUser, result *bulkChannelAddResult) error {
+	if err := e.addToChannel(u.UserID, config, result); err != nil {
 		return fmt.Errorf("error inviting user by ID: %w", err)
 	}
 
 	return nil
 }
 
-func (e *Engine) inviteMattermostByUsername(config *Config, invitee InviteUser, result *bulkInviteResult) error {
-	user, appErr := e.API.GetUserByUsername(invitee.Username)
+func (e *Engine) addUserToChannelByUsername(config *Config, u AddUser, result *bulkChannelAddResult) error {
+	user, appErr := e.API.GetUserByUsername(u.Username)
 	if appErr != nil {
-		e.API.LogError("error getting user by username", "username", invitee.Username, "user_id", config.UserID, "channel_id", config.ChannelID, "err", appErr.Error())
+		e.API.LogError("error getting user by username", "username", u.Username, "user_id", config.UserID, "channel_id", config.ChannelID, "err", appErr.Error())
 		result.errorUsers++
 		return fmt.Errorf("error getting user by username: %w", appErr)
 	}
 
-	if err := e.invite(user.Id, config, result); err != nil {
+	if err := e.addToChannel(user.Id, config, result); err != nil {
 		return fmt.Errorf("error inviting user by username: %w", err)
 	}
 
 	return nil
 }
 
-func (e *Engine) invite(userID string, config *Config, result *bulkInviteResult) error {
+func (e *Engine) addToChannel(userID string, config *Config, result *bulkChannelAddResult) error {
 	// Get user
 	user, appErr := e.API.GetUser(userID)
 	if appErr != nil {
-		e.API.LogError("error getting user information", "invitee_user_id", userID, "user_id", config.UserID, "channel_id", config.ChannelID, "err", appErr.Error())
+		e.API.LogError("error getting user information", "add_user_id", userID, "trigger_user_id", config.UserID, "channel_id", config.ChannelID, "err", appErr.Error())
 		result.errorUsers++
 		return appErr
 	}
 
 	// Check if user is guest
-	if user.IsGuest() && !config.InviteGuests {
-		e.API.LogInfo("not inviting guest user", "invitee_user_id", userID, "user_id", config.UserID, "channel_id", config.ChannelID)
-		result.notInvitedGuest++
+	if user.IsGuest() && !config.AddGuests {
+		e.API.LogInfo("not inviting guest user", "add_user_id", userID, "trigger_user_id", config.UserID, "channel_id", config.ChannelID)
+		result.notAddedGuest++
 		return nil
 	}
 
 	// Check team membership
 	teamMembership, appErr := e.API.GetTeamMember(config.channel.TeamId, userID)
 	if appErr != nil && appErr.StatusCode != http.StatusNotFound {
-		e.API.LogError("error getting team membership information for user", "invitee_user_id", userID, "user_id", config.UserID, "channel_id", config.ChannelID, "team_id", config.channel.TeamId, "err", appErr.Error())
+		e.API.LogError("error getting team membership information for user", "add_user_id", userID, "trigger_user_id", config.UserID, "channel_id", config.ChannelID, "team_id", config.channel.TeamId, "err", appErr.Error())
 		result.errorUsers++
 		return appErr
 	}
 
 	if teamMembership == nil {
-		if config.InviteToTeam {
+		if config.AddToTeam {
 			if _, createAppErr := e.API.CreateTeamMember(config.channel.TeamId, userID); createAppErr != nil {
-				e.API.LogError("error creating team membership information for user", "invitee_user_id", userID, "user_id", config.UserID, "channel_id", config.ChannelID, "team_id", config.channel.TeamId, "err", appErr.Error())
+				e.API.LogError("error creating team membership information for user", "add_user_id", userID, "trigger_user_id", config.UserID, "channel_id", config.ChannelID, "team_id", config.channel.TeamId, "err", appErr.Error())
 				result.errorUsers++
 				return createAppErr
 			}
 			result.addedToTeam++
 		} else {
-			e.API.LogInfo("not inviting member since it doesn't belong to the team", "invitee_user_id", userID, "user_id", config.UserID, "channel_id", config.ChannelID, "team_id", config.channel.TeamId)
-			result.notInvitedNonTeamMember++
+			e.API.LogInfo("not inviting member since it doesn't belong to the team", "add_user_id", userID, "trigger_user_id", config.UserID, "channel_id", config.ChannelID, "team_id", config.channel.TeamId)
+			result.notAddedNonTeamMember++
 			return nil
 		}
 	}
 
 	if _, appErr := e.API.AddUserToChannel(config.ChannelID, userID, config.UserID); appErr != nil {
 		result.errorUsers++
-		e.API.LogError("error adding user to channel", "invitee_user_id", userID, "user_id", config.UserID, "channel_id", config.ChannelID, "err", appErr.Error())
+		e.API.LogError("error adding user to channel", "add_user_id", userID, "trigger_user_id", config.UserID, "channel_id", config.ChannelID, "err", appErr.Error())
 		return appErr
 	}
 
 	return nil
 }
 
-func (e *Engine) inviteUsers(config *Config) bulkInviteResult {
-	var result bulkInviteResult
-	for _, invitee := range config.Users {
-		if invitee.UserID != "" {
-			if err := e.inviteMattermostByUserID(config, invitee, &result); err != nil {
+func (e *Engine) addUsersToChannel(config *Config) bulkChannelAddResult {
+	var result bulkChannelAddResult
+	for _, u := range config.Users {
+		if u.UserID != "" {
+			if err := e.addUserToChannelByUserID(config, u, &result); err != nil {
 				continue
 			}
-			result.invitedUsers++
+			result.addedUsers++
 		}
 
-		if invitee.Username != "" {
-			if err := e.inviteMattermostByUsername(config, invitee, &result); err != nil {
+		if u.Username != "" {
+			if err := e.addUserToChannelByUsername(config, u, &result); err != nil {
 				continue
 			}
-			result.invitedUsers++
+			result.addedUsers++
 		}
 	}
 

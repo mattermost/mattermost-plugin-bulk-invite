@@ -3,27 +3,27 @@ import {useSelector, useDispatch} from 'react-redux';
 
 import {Modal} from 'react-bootstrap';
 
-import {isBulkInviteChannelModalVisible} from '@/selectors';
+import {isBulkAddChannelModalVisible} from '@/selectors';
 
-import BulkInviteChannelForm from '../forms/bulk_invite_channel_form';
-import {closeBulkInviteChannelModal} from '@/actions';
+import BulkAddChannelForm from '../forms/bulk_add_channel_form';
+import {closeBulkAddChannelModal} from '@/actions';
 
 type Props = {};
 
-import './bulk_invite_modal.scss';
+import './bulk_add_modal.scss';
 
-export default function BulkInviteChannelModal(props: Props) {
-    const visible = useSelector(isBulkInviteChannelModalVisible);
+export default function BulkAddChannelModal(props: Props) {
+    const visible = useSelector(isBulkAddChannelModalVisible);
 
     const dispatch = useDispatch();
-    const close = () => dispatch(closeBulkInviteChannelModal());
+    const close = () => dispatch(closeBulkAddChannelModal());
 
     if (!visible) {
         return null;
     }
 
     const content = (
-        <BulkInviteChannelForm
+        <BulkAddChannelForm
             {...props}
             close={close}
         />
@@ -31,7 +31,7 @@ export default function BulkInviteChannelModal(props: Props) {
 
     return (
         <Modal
-            id='bulk-invite-channel-modal'
+            id='bulk-add-channel-modal'
             dialogClassName='a11y__modal channel-invite'
             show={visible}
             onHide={close}

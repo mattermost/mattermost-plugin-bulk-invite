@@ -4,31 +4,31 @@ import action_types from './action_types';
 
 export const openBulkInviteChannelModal = (channelId: string) => {
     return {
-        type: action_types.OPEN_BULK_INVITE_CHANNEL_MODAL,
+        type: action_types.OPEN_BULK_ADD_CHANNEL_MODAL,
         data: {
             channelId,
         },
     };
 };
 
-const bulkInviteChannelModalVisible = (state = false, action) => {
+const bulkAddChannelModalVisible = (state = false, action) => {
     switch (action.type) {
-    case action_types.OPEN_BULK_INVITE_CHANNEL_MODAL:
+    case action_types.OPEN_BULK_ADD_CHANNEL_MODAL:
         return true;
-    case action_types.CLOSE_BULK_INVITE_CHANNEL_MODAL:
+    case action_types.CLOSE_BULK_ADD_CHANNEL_MODAL:
         return false;
     default:
         return state;
     }
 };
 
-const bulkInviteChannelModal = (state = false, action) => {
+const bulkAddChannelModal = (state = false, action) => {
     switch (action.type) {
-    case action_types.OPEN_BULK_INVITE_CHANNEL_MODAL:
+    case action_types.OPEN_BULK_ADD_CHANNEL_MODAL:
         return {
             channelId: action.data.channelId,
         };
-    case action_types.CLOSE_BULK_INVITE_CHANNEL_MODAL:
+    case action_types.CLOSE_BULK_ADD_CHANNEL_MODAL:
         return {};
     default:
         return state;
@@ -36,13 +36,13 @@ const bulkInviteChannelModal = (state = false, action) => {
 };
 
 export default combineReducers({
-    bulkInviteChannelModal,
-    bulkInviteChannelModalVisible,
+    bulkAddChannelModal,
+    bulkAddChannelModalVisible,
 });
 
 export type ReducerState = {
-    bulkInviteChannelModalVisible: boolean;
-    bulkInviteChannelModal: {
+    bulkAddChannelModalVisible: boolean;
+    bulkAddChannelModal: {
         channelId: string;
     } | null;
 }

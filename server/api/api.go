@@ -13,25 +13,25 @@ import (
 func Init(handler *Handler, engine *engine.Engine) {
 	apiV1Router := handler.Router.PathPrefix("/api/v1").Subrouter()
 	apiV1Router.HandleFunc(
-		"/bulk_invite",
-		injectInviterEngine(handler.apiBulkInviteHandler, engine),
+		"/bulk_add",
+		injectEngine(handler.apiBulkAddHandler, engine),
 	).Methods("POST")
 
 	handlersRouter := handler.Router.PathPrefix("/handlers").Subrouter()
 	handlersRouter.HandleFunc(
-		"/channel_bulk_invite",
-		checkAuthenticatedUser(injectInviterEngine(handler.channelBulkInviteHandler, engine)),
+		"/channel_bulk_add",
+		checkAuthenticatedUser(injectEngine(handler.channelBulkAddHandler, engine)),
 	).Methods("POST")
 }
 
-type bulkInvitePayload struct {
-	ChannelID    string              `json:"channel_id"`
-	InviteToTeam bool                `json:"invite_to_team"`
-	InviteGuests bool                `json:"invite_guests"`
-	Users        []engine.InviteUser `json:"users"`
+type bulkAddChannelPayload struct {
+	ChannelID string           `json:"channel_id"`
+	AddToTeam bool             `json:"add_to_team"`
+	AddGuests bool             `json:"add_guests"`
+	Users     []engine.AddUser `json:"users"`
 }
 
-func (bip *bulkInvitePayload) IsValid() error {
+func (bip *bulkAddChannelPayload) IsValid() error {
 	if bip.ChannelID == "" {
 		return perror.NewPError(fmt.Errorf("missing channel_id"), "Channel ID is required.")
 	}
@@ -43,7 +43,7 @@ func (bip *bulkInvitePayload) IsValid() error {
 	return nil
 }
 
-func (bip *bulkInvitePayload) FromRequest(r *http.Request) *perror.PError {
+func (bip *bulkAddChannelPayload) FromRequest(r *http.Request) *perror.PError {
 	f, h, err := r.FormFile("file")
 	if f == nil {
 		return perror.NewPError(fmt.Errorf("missing file"), "File is required.")
@@ -61,19 +61,18 @@ func (bip *bulkInvitePayload) FromRequest(r *http.Request) *perror.PError {
 	}
 
 	bip.ChannelID = r.FormValue("channel_id")
-	bip.InviteToTeam = r.FormValue("invite_to_team") == "true"
-	bip.InviteGuests = r.FormValue("invite_guests") == "true"
+	bip.AddToTeam = r.FormValue("add_to_team") == "true"
+	bip.AddGuests = r.FormValue("add_guests") == "true"
 
 	return nil
 }
 
-func (h *Handler) apiBulkInviteHandler(w http.ResponseWriter, r *http.Request, e *engine.Engine) {
-	// userID := getMattermostUserIDFromRequest(r)
-	userID := "bfswryyw67ntubga5omo9j5e1o"
+func (h *Handler) apiBulkAddHandler(w http.ResponseWriter, r *http.Request, e *engine.Engine) {
+	userID := r.URL.Query().Get("user_id")
 
 	defer r.Body.Close()
 
-	var payload bulkInvitePayload
+	var payload bulkAddChannelPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		h.Logger.LogError("error parsing payload", "err", err.Error())
 		sendResponse(w, withStatusCode(http.StatusBadRequest), withBody(`{"error": "%s"}`, err.Error()))
@@ -86,10 +85,10 @@ func (h *Handler) apiBulkInviteHandler(w http.ResponseWriter, r *http.Request, e
 	}
 
 	engineConfig := &engine.Config{
-		UserID:       userID,
-		ChannelID:    payload.ChannelID,
-		InviteToTeam: payload.InviteToTeam,
-		Users:        payload.Users,
+		UserID:    userID,
+		ChannelID: payload.ChannelID,
+		AddToTeam: payload.AddToTeam,
+		Users:     payload.Users,
 	}
 
 	if err := e.StartJob(context.TODO(), engineConfig); err != nil {
@@ -104,22 +103,22 @@ func (h *Handler) apiBulkInviteHandler(w http.ResponseWriter, r *http.Request, e
 	sendResponse(w, withStatusCode(http.StatusCreated))
 }
 
-func (h *Handler) channelBulkInviteHandler(w http.ResponseWriter, r *http.Request, e *engine.Engine) {
+func (h *Handler) channelBulkAddHandler(w http.ResponseWriter, r *http.Request, e *engine.Engine) {
 	userID := getMattermostUserIDFromRequest(r)
 
 	defer r.Body.Close()
 
 	// Do not parse data in memory
 	if err := r.ParseMultipartForm(0); err != nil {
-		h.Logger.LogError("error parsing channel bulk invite form", "err", err.Error())
+		h.Logger.LogError("error parsing channel bulk add form", "err", err.Error())
 		sendInternalServerError(w)
 		return
 	}
 
-	var payload bulkInvitePayload
+	var payload bulkAddChannelPayload
 
 	if err := payload.FromRequest(r); err != nil {
-		h.Logger.LogError("error parsing channel bulk invite form payload", "err", err.Error())
+		h.Logger.LogError("error parsing channel bulk add form payload", "err", err.Error())
 		sendResponse(w,
 			withHeader("Content-Type", "application/json"),
 			withStatusCode(http.StatusBadRequest),
@@ -134,10 +133,10 @@ func (h *Handler) channelBulkInviteHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	engineConfig := &engine.Config{
-		UserID:       userID,
-		ChannelID:    payload.ChannelID,
-		InviteToTeam: payload.InviteToTeam,
-		Users:        payload.Users,
+		UserID:    userID,
+		ChannelID: payload.ChannelID,
+		AddToTeam: payload.AddToTeam,
+		Users:     payload.Users,
 	}
 
 	if err := e.StartJob(context.TODO(), engineConfig); err != nil {
@@ -149,5 +148,5 @@ func (h *Handler) channelBulkInviteHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	sendResponse(w, withStatusCode(http.StatusCreated), withBody(`{"message": "bulk invite job started"}`))
+	sendResponse(w, withStatusCode(http.StatusCreated), withBody(`{"message": "bulk add job started"}`))
 }

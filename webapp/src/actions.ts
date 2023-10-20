@@ -6,7 +6,7 @@ import {Channel} from 'mattermost-redux/types/channels';
 
 import {doFetchWithResponse} from './client';
 import {getPluginServerRoute} from './selectors';
-import {BulkInvitePayload} from './components/forms/bulk_invite_channel_form';
+import {BulkAddChannelPayload} from './components/forms/bulk_add_channel_form';
 import action_types from './action_types';
 
 const client = new Client4();
@@ -26,22 +26,23 @@ export const getSiteURL = (state: GlobalState): string => {
     return basePath;
 };
 
-export const alwaysShow = (postId: string): boolean => {
+export const alwaysShow = (): boolean => {
     return true;
 };
 
-export type BulkInviteChannelEventResponse = {data?: any; error?: string};
+export type BulkAddChannelEventResponse = {data?: any; error?: string};
 
-export const bulkInviteToChannel = (payload: BulkInvitePayload) => async (dispatch, getState): Promise<BulkInviteChannelEventResponse> => {
+export const bulkAddToChannel = (payload: BulkAddChannelPayload) => async (dispatch, getState): Promise<BulkAddChannelEventResponse> => {
     const state = getState();
     const pluginServerRoute = getPluginServerRoute(state);
 
     const formData = new FormData();
     formData.append('channel_id', payload.channel_id);
-    formData.append('invite_to_team', String(payload.invite_to_team).toLowerCase());
+    formData.append('add_to_team', String(payload.add_to_team).toLowerCase());
+    formData.append('add_guests', String(payload.add_guests).toLowerCase());
     formData.append('file', payload.file);
 
-    return doFetchWithResponse(`${pluginServerRoute}/handlers/channel_bulk_invite`, {
+    return doFetchWithResponse(`${pluginServerRoute}/handlers/channel_bulk_add`, {
         method: 'POST',
         body: formData,
     }).
@@ -54,18 +55,18 @@ export const bulkInviteToChannel = (payload: BulkInvitePayload) => async (dispat
         });
 };
 
-export const openBulkInviteChannelModal = (channelId: string) => {
+export const openBulkAddChannelModal = (channelId: string) => {
     return {
-        type: action_types.OPEN_BULK_INVITE_CHANNEL_MODAL,
+        type: action_types.OPEN_BULK_ADD_CHANNEL_MODAL,
         data: {
             channelId,
         },
     };
 };
 
-export const closeBulkInviteChannelModal = () => {
+export const closeBulkAddChannelModal = () => {
     return {
-        type: action_types.CLOSE_BULK_INVITE_CHANNEL_MODAL,
+        type: action_types.CLOSE_BULK_ADD_CHANNEL_MODAL,
     };
 };
 

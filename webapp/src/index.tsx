@@ -6,12 +6,12 @@ import PluginRegistry from '@mattermost/webapp/plugins/registry';
 
 import {useEffect} from 'react';
 
-import {Channel, ChannelType} from 'mattermost-redux/types/channels';
+// import {Channel, ChannelType} from 'mattermost-redux/types/channels';
 
-import {alwaysShow, openBulkInviteChannelModal} from './actions';
+import {alwaysShow, openBulkAddChannelModal} from './actions';
 import {PluginId} from './plugin_id';
 import reducers from './reducers';
-import BulkInviteChannelModal from './components/modals/bulk_invite_modal';
+import BulkAddChannelModal from './components/modals/bulk_add_modal';
 
 export default class Plugin {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
@@ -22,28 +22,11 @@ export default class Plugin {
             registry.registerChannelHeaderMenuAction(
                 'Bulk invite',
                 async (channelID: string) => {
-                    store.dispatch(openBulkInviteChannelModal(channelID));
+                    store.dispatch(openBulkAddChannelModal(channelID));
                 },
-                alwaysShow,
             );
 
-            // NOTE(fmartingr): This is showing up in every channel type (including DMs) and we can't filter it out, so we are not using it for now.
-            // if (registry.registerChannelIntroButtonAction) {
-            //     registry.registerChannelIntroButtonAction(
-            //         <i
-            //             className='icon-account-plus-outline'
-            //             title='Bulk invite icon'
-            //         />,
-            //         async (channel: Channel) => {
-            //             if (channel.type === 'O' || channel.type === 'P' || channel.type === 'G') {
-            //                 store.dispatch(openBulkInviteChannelModal(channel.id));
-            //             }
-            //         },
-            //         'Bulk invite users',
-            //     );
-            // }
-
-            registry.registerRootComponent(BulkInviteChannelModal);
+            registry.registerRootComponent(BulkAddChannelModal);
         };
 
         registry.registerRootComponent(() => <SetupUI setup={setup}/>);

@@ -1,3 +1,3 @@
-import {id} from './manifest.js';
+import {id} from './manifest';
 
 export const PluginId: string = id;

@@ -1,47 +1,52 @@
 import React from 'react';
 
-type Props = {
-    inputId?: string;
+export type Props = {
     label: React.ReactNode;
-    children: React.ReactChildren;
-    helpText?: React.ReactNode;
+    element: React.ReactElement;
+    helpText?: JSX.Element;
     required?: boolean;
     hideRequiredStar?: boolean;
+    disabledText?: JSX.Element;
+    type?: string;
 }
 
-export default function FormComponent(props: Props) {
+export function FormComponent(props: Props) {
     const {
-        children,
+        element,
         helpText,
-        inputId,
         label,
         required,
+        disabledText,
         hideRequiredStar,
     } = props;
 
     return (
-        <div className='form-group less'>
-            {label &&
-                <label
-                    className='control-label margin-bottom x2'
-                    htmlFor={inputId}
-                >
-                    {label}
-                </label>
-            }
-            {required && !hideRequiredStar &&
+        <div className='form-group'>
+            <label
+                className='control-label margin-bottom x2'
+                htmlFor={element.props.id}
+            >
+                {(element.props.type == 'checkbox') && element}
+                {label}
+                {required && !hideRequiredStar &&
                 <span
                     className='error-text'
                     style={{marginLeft: '3px'}}
                 >
                     {'*'}
                 </span>
-            }
-            <div>
-                {children}
+                }
+            </label>
+            {helpText && !element.props.disabled &&
                 <div className='help-text'>
                     {helpText}
-                </div>
+                </div>}
+            {element.props.disabled && disabledText &&
+                <div className='help-text disabled-text'>
+                    {disabledText}
+                </div>}
+            <div>
+                {(element.props.type != 'checkbox') && element}
             </div>
         </div>
     );
