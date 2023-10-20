@@ -20,6 +20,29 @@
         color: var(--error-text);
     }
 
+    button {
+        &.btn {
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            height: 40px;
+            padding: 0 20px;
+            transition: all 0.15s ease;
+        }
+
+        &.btn-primary {
+            background-color: var(--button-bg);
+            border-color: var(--button-bg);
+            color: var(--button-color);
+        }
+
+        &.btn-tertiary {
+            background: rgba(var(--button-bg-rgb), 0.08);
+            border-color: transparent;
+            color: var(--button-bg);
+        }
+    }
+
     .alert .fa {
         margin-right: 0.5em;
     }
