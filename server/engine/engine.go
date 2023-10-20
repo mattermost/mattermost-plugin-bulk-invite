@@ -212,6 +212,7 @@ func (e *Engine) addUsersToChannel(config *Config) bulkChannelAddResult {
 				continue
 			}
 			result.addedUsers++
+			continue
 		}
 
 		if u.Username != "" {
@@ -219,6 +220,7 @@ func (e *Engine) addUsersToChannel(config *Config) bulkChannelAddResult {
 				continue
 			}
 			result.addedUsers++
+			continue
 		}
 	}
 
