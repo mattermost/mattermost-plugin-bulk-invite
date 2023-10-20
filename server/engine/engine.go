@@ -175,7 +175,7 @@ func (e *Engine) addToChannel(userID string, config *Config, result *bulkChannel
 	// Check team membership
 	teamMembership, appErr := e.API.GetTeamMember(config.channel.TeamId, userID)
 	if appErr != nil && appErr.StatusCode != http.StatusNotFound {
-		e.API.LogError("error getting team membership information for user", "add_user_id", userID, "trigger_user_id", config.UserID, "channel_id", config.ChannelID, "team_id", config.channel.TeamId, "err", appErr.Error())
+		e.API.LogError("error getting team membership for user", "add_user_id", userID, "trigger_user_id", config.UserID, "channel_id", config.ChannelID, "team_id", config.channel.TeamId, "err", appErr.Error())
 		result.errorUsers++
 		return appErr
 	}
@@ -183,7 +183,7 @@ func (e *Engine) addToChannel(userID string, config *Config, result *bulkChannel
 	if teamMembership == nil {
 		if config.AddToTeam {
 			if _, createAppErr := e.API.CreateTeamMember(config.channel.TeamId, userID); createAppErr != nil {
-				e.API.LogError("error creating team membership information for user", "add_user_id", userID, "trigger_user_id", config.UserID, "channel_id", config.ChannelID, "team_id", config.channel.TeamId, "err", appErr.Error())
+				e.API.LogError("error creating team membership for user", "add_user_id", userID, "trigger_user_id", config.UserID, "channel_id", config.ChannelID, "team_id", config.channel.TeamId, "err", createAppErr.Error())
 				result.errorUsers++
 				return createAppErr
 			}
