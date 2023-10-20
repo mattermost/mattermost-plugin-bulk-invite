@@ -48,18 +48,15 @@ export default function BulkAddChannelForm(props: Props) {
         const response = (await dispatch(getChannelInfo(channelId)) as unknown as GetChannelResponse);
 
         if (response.error) {
-            setStoredError(response.error);
             return null;
         }
-
-        setStoredError('');
 
         return response.channel;
     }, []);
 
     if (!channelName) {
         loadChannelInfo(modalProps.channelId).then((channel) => {
-            if (!channel) setChannelName(channel.display_name);
+            if (channel) setChannelName(channel.display_name);
         });
     }
 
@@ -145,7 +142,7 @@ export default function BulkAddChannelForm(props: Props) {
             role='form'
             onSubmit={handleSubmit}
         >
-            <Modal.Body >
+            <Modal.Body>
                 <div className='channel-invite__header'>
                     <h1>{'Bulk add to ' + channelName}</h1>
                 </div>
