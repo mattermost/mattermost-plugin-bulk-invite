@@ -6,10 +6,9 @@ import {Modal} from 'react-bootstrap';
 import {Channel} from 'mattermost-redux/types/channels';
 
 import FormButton from '../form_button';
-import Loading from '../loading';
 import {BulkAddChannelEventResponse, GetChannelResponse, bulkAddToChannel, getChannelInfo} from '@/actions';
 
-import {getBulkAddChannelModal as getBulkAddChannelModal} from '@/selectors';
+import {getBulkAddChannelModal} from '@/selectors';
 import {Props as FormComponentProps, FormComponent} from '../form_component';
 
 import './bulk_add_channel_form.scss';
@@ -29,7 +28,6 @@ export type BulkAddChannelPayload = {
 export default function BulkAddChannelForm(props: Props) {
     const [storedError, setStoredError] = useState('');
     const [submitting, setSubmitting] = useState(false);
-    const [loading, setLoading] = useState(false);
     const [channelName, setChannelName] = useState('');
 
     const dispatch = useDispatch();
@@ -46,12 +44,12 @@ export default function BulkAddChannelForm(props: Props) {
         channel_id: modalProps.channelId,
     });
 
-    const loadChannelInfo = useCallback(async (channelId: string): Promise<Channel> => {
+    const loadChannelInfo = useCallback(async (channelId: string): Promise<Channel | null> => {
         const response = (await dispatch(getChannelInfo(channelId)) as unknown as GetChannelResponse);
 
         if (response.error) {
             setStoredError(response.error);
-            return [];
+            return null;
         }
 
         setStoredError('');
@@ -61,7 +59,7 @@ export default function BulkAddChannelForm(props: Props) {
 
     if (!channelName) {
         loadChannelInfo(modalProps.channelId).then((channel) => {
-            setChannelName(channel.display_name);
+            if (!channel) setChannelName(channel.display_name);
         });
     }
 
@@ -122,17 +120,12 @@ export default function BulkAddChannelForm(props: Props) {
         </React.Fragment>
     );
 
-    let form;
-    if (loading) {
-        form = <Loading/>;
-    } else {
-        form = (
-            <ActualForm
-                formValues={formValues}
-                setFormValue={setFormValue}
-            />
-        );
-    }
+    const form = (
+        <ActualForm
+            formValues={formValues}
+            setFormValue={setFormValue}
+        />
+    );
 
     let error;
     if (storedError) {
@@ -178,7 +171,12 @@ const ActualForm = (props: ActualFormProps) => {
         {
             label: 'File (.JSON format)',
             required: true,
-            helpText: <div><a href='https://github.com/mattermost/mattermost-plugin-bulk-invite/blob/master/.readme/template.jsonc' target='_blank'>Download a template</a> to ensure your file formatting is correct.</div>,
+            helpText: <div>
+                <a
+                    href='https://github.com/mattermost/mattermost-plugin-bulk-invite/blob/master/.readme/template.jsonc'
+                    target='_blank'
+                    rel='noreferrer'
+                >{'Download a template'}</a> {'to ensure your file formatting is correct.'}</div>,
             element: (
                 <input
                     id='bulk-add-channel-file'
@@ -211,7 +209,6 @@ const ActualForm = (props: ActualFormProps) => {
                         setFormValue('add_to_team', e.target.checked);
                     }}
                     value={String(formValues.add_to_team)}
-
                     // disabled={teamAddDisabled}
                     type='checkbox'
                 />

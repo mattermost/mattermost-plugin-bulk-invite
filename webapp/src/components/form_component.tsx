@@ -26,7 +26,7 @@ export function FormComponent(props: Props) {
                 className='control-label margin-bottom x2'
                 htmlFor={element.props.id}
             >
-                {(element.props.type == 'checkbox') && element}
+                {(element.props.type === 'checkbox') && element}
                 {label}
                 {required && !hideRequiredStar &&
                 <span
@@ -46,7 +46,7 @@ export function FormComponent(props: Props) {
                     {disabledText}
                 </div>}
             <div>
-                {(element.props.type != 'checkbox') && element}
+                {(element.props.type !== 'checkbox') && element}
             </div>
         </div>
     );

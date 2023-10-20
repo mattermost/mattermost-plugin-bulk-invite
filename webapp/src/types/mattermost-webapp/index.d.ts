@@ -1,4 +1,4 @@
-import React from "react"
+import React from 'react';
 
 export interface PluginRegistry {
     registerReducer(reducer: Reducer<any, any>)
