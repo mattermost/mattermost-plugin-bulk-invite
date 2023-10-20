@@ -8,6 +8,7 @@ import {doFetchWithResponse} from './client';
 import {getPluginServerRoute} from './selectors';
 import {BulkAddChannelPayload} from './components/forms/bulk_add_channel_form';
 import action_types from './action_types';
+import { GlobalState } from 'mattermost-redux/types/store';
 
 const client = new Client4();
 
@@ -24,10 +25,6 @@ export const getSiteURL = (state: GlobalState): string => {
     }
 
     return basePath;
-};
-
-export const alwaysShow = (): boolean => {
-    return true;
 };
 
 export type BulkAddChannelEventResponse = {data?: any; error?: string};

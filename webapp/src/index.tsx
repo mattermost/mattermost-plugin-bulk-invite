@@ -1,17 +1,15 @@
-import {Store, Action} from 'redux';
+import { Store, Action } from 'redux';
 
-import {GlobalState} from '@mattermost/types/lib/store';
+import { GlobalState } from '@mattermost/types/lib/store';
 
-import PluginRegistry from '@mattermost/webapp/plugins/registry';
+import { useEffect } from 'react';
 
-import {useEffect} from 'react';
-
-// import {Channel, ChannelType} from 'mattermost-redux/types/channels';
-
-import {alwaysShow, openBulkAddChannelModal} from './actions';
-import {PluginId} from './plugin_id';
+import { openBulkAddChannelModal } from './actions';
+import { manifest } from './manifest';
 import reducers from './reducers';
-import BulkAddChannelModal from './components/modals/bulk_add_modal';
+import BulkAddChannelModal from './components/modals/bulk_add_channel_modal';
+
+import { PluginRegistry } from '@/types/mattermost-webapp';
 
 export default class Plugin {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
@@ -19,6 +17,7 @@ export default class Plugin {
         registry.registerReducer(reducers);
 
         const setup = async () => {
+            console.log("setup")
             registry.registerChannelHeaderMenuAction(
                 'Bulk invite',
                 async (channelID: string) => {
@@ -29,11 +28,11 @@ export default class Plugin {
             registry.registerRootComponent(BulkAddChannelModal);
         };
 
-        registry.registerRootComponent(() => <SetupUI setup={setup}/>);
+        registry.registerRootComponent(() => <SetupUI setup={setup} />);
     }
 }
 
-const SetupUI = ({setup}) => {
+const SetupUI = ({ setup }: { setup: () => Promise<void> }) => {
     useEffect(() => {
         setup();
     }, []);
@@ -47,4 +46,4 @@ declare global {
     }
 }
 
-window.registerPlugin(PluginId, new Plugin());
+window.registerPlugin(manifest.id, new Plugin());

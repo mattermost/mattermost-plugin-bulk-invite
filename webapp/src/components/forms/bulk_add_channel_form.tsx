@@ -9,9 +9,10 @@ import FormButton from '../form_button';
 import Loading from '../loading';
 import {BulkAddChannelEventResponse, GetChannelResponse, bulkAddToChannel, getChannelInfo} from '@/actions';
 
-import './bulk_add_channel_form.scss';
-import {Props as FormComponentProps, FormComponent} from '../form_component';
 import {getBulkAddChannelModal as getBulkAddChannelModal} from '@/selectors';
+import {Props as FormComponentProps, FormComponent} from '../form_component';
+
+import './bulk_add_channel_form.scss';
 
 type Props = {
     close: (e?: Event) => void;

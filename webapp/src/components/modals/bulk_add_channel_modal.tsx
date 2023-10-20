@@ -10,7 +10,7 @@ import {closeBulkAddChannelModal} from '@/actions';
 
 type Props = {};
 
-import './bulk_add_modal.scss';
+import './bulk_add_channel_modal.scss';
 
 export default function BulkAddChannelModal(props: Props) {
     const visible = useSelector(isBulkAddChannelModalVisible);

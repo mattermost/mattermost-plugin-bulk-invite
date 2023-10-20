@@ -1,10 +1,10 @@
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
-import {PluginId} from './plugin_id';
+import {manifest} from './manifest';
 
 import {ReducerState} from './reducers';
 
-const getPluginState = (state): ReducerState => state['plugins-' + PluginId] || {};
+const getPluginState = (state): ReducerState => state['plugins-' + manifest.id] || {};
 
 export const getPluginServerRoute = (state) => {
     const config = getConfig(state);
@@ -18,7 +18,7 @@ export const getPluginServerRoute = (state) => {
         }
     }
 
-    return basePath + '/plugins/' + PluginId;
+    return basePath + '/plugins/' + manifest.id;
 };
 
 export const isBulkAddChannelModalVisible = (state) => getPluginState(state).bulkAddChannelModalVisible;
