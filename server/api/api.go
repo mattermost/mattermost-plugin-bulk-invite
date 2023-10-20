@@ -136,6 +136,7 @@ func (h *Handler) channelBulkAddHandler(w http.ResponseWriter, r *http.Request, 
 		UserID:    userID,
 		ChannelID: payload.ChannelID,
 		AddToTeam: payload.AddToTeam,
+		AddGuests: payload.AddGuests,
 		Users:     payload.Users,
 	}
 
