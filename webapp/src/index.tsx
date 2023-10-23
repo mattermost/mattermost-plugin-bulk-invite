@@ -2,7 +2,7 @@ import {Store, Action} from 'redux';
 
 import {GlobalState} from '@mattermost/types/lib/store';
 
-import {useEffect} from 'react';
+import React, {useEffect} from 'react';
 
 import {PluginRegistry} from '@/types/mattermost-webapp';
 

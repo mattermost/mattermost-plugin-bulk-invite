@@ -38,7 +38,9 @@ export const bulkAddToChannel = (payload: BulkAddChannelPayload) => async (dispa
     formData.append('channel_id', payload.channel_id);
     formData.append('add_to_team', String(payload.add_to_team).toLowerCase());
     formData.append('add_guests', String(payload.add_guests).toLowerCase());
-    formData.append('file', payload.file);
+    if (payload.file) {
+        formData.append('file', payload.file);
+    }
 
     return doFetchWithResponse(`${pluginServerRoute}/handlers/channel_bulk_add`, {
         method: 'POST',
@@ -78,7 +80,7 @@ export const getChannelInfo = (channelId: string) => async (dispatch, getState):
     try {
         const channel = await client.getChannel(channelId);
         return {channel, error: null};
-    } catch (e) {
+    } catch (e: any) {
         const error = e.message?.error || 'An error occurred while retrieving channel information.';
         return {channel: null, error};
     }
