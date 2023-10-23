@@ -6,11 +6,12 @@ import {Channel} from 'mattermost-redux/types/channels';
 
 import {GlobalState} from 'mattermost-redux/types/store';
 
+import {AnyAction} from 'redux';
+
 import {doFetchWithResponse} from './client';
 import {getPluginServerRoute} from './selectors';
 import {BulkAddChannelPayload} from './components/forms/bulk_add_channel_form';
 import action_types from './action_types';
-import { AnyAction } from 'redux';
 
 const client = new Client4();
 
