@@ -7,15 +7,15 @@ type PError struct {
 	err          error
 }
 
-func (e *PError) Error() string {
-	if e.err == nil {
-		return e.err.Error()
+func (e *PError) Error() error {
+	if e.err != nil {
+		return e.err
 	}
-	return ""
+	return nil
 }
 
 func (e *PError) String() string {
-	return e.Error()
+	return e.Error().Error()
 }
 
 func (e *PError) Message() string {
