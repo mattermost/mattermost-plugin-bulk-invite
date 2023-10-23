@@ -26,22 +26,16 @@ export type BulkAddChannelPayload = {
 }
 
 export default function BulkAddChannelForm(props: Props) {
+    const modalProps = useSelector(getBulkAddChannelModal);
+    const dispatch = useDispatch();
     const [storedError, setStoredError] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [channelName, setChannelName] = useState('');
-
-    const dispatch = useDispatch();
-
-    const modalProps = useSelector(getBulkAddChannelModal);
-    if (modalProps === null || modalProps.channelId === null) {
-        return null;
-    }
-
     const [formValues, setFormValues] = useState<BulkAddChannelPayload>({
         add_to_team: false,
         add_guests: false,
         users: [],
-        channel_id: modalProps.channelId,
+        channel_id: modalProps?.channelId || '',
     });
 
     const loadChannelInfo = useCallback(async (channelId: string): Promise<Channel | null> => {
@@ -56,7 +50,9 @@ export default function BulkAddChannelForm(props: Props) {
 
     if (!channelName) {
         loadChannelInfo(modalProps.channelId).then((channel) => {
-            if (channel) setChannelName(channel.display_name);
+            if (channel) {
+                setChannelName(channel.display_name);
+            }
         });
     }
 
@@ -206,6 +202,7 @@ const ActualForm = (props: ActualFormProps) => {
                         setFormValue('add_to_team', e.target.checked);
                     }}
                     value={String(formValues.add_to_team)}
+
                     // disabled={teamAddDisabled}
                     type='checkbox'
                 />
