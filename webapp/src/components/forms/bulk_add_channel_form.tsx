@@ -26,8 +26,8 @@ export type BulkAddChannelPayload = {
 }
 
 export default function BulkAddChannelForm(props: Props) {
-    const modalProps = useSelector(getBulkAddChannelModal);
     const dispatch = useDispatch();
+    const modalProps = useSelector(getBulkAddChannelModal);
     const [storedError, setStoredError] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [channelName, setChannelName] = useState('');
@@ -39,7 +39,7 @@ export default function BulkAddChannelForm(props: Props) {
     });
 
     const loadChannelInfo = useCallback(async (channelId: string): Promise<Channel | null | undefined> => {
-        const response = (await dispatch(getChannelInfo(channelId)) as unknown as GetChannelResponse);
+        const response = await getChannelInfo(channelId);
 
         if (response.error) {
             return null;
@@ -83,7 +83,7 @@ export default function BulkAddChannelForm(props: Props) {
 
         setSubmitting(true);
 
-        const response = (await dispatch(bulkAddToChannel(formValues))) as BulkAddChannelEventResponse;
+        const response = await bulkAddToChannel(formValues);
         if (response.error) {
             handleError(response.error);
             return;

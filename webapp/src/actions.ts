@@ -1,19 +1,15 @@
-import Client4 from 'mattermost-redux/client/client4';
-
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
 import {Channel} from 'mattermost-redux/types/channels';
 
-import {GlobalState} from 'mattermost-redux/types/store';
-
 import {AnyAction} from 'redux';
 
-import {doFetchWithResponse} from './client';
-import {getPluginServerRoute} from './selectors';
+import {GlobalState} from 'mattermost-redux/types/store';
+
+import {client, doFetchWithResponse} from './client';
 import {BulkAddChannelPayload} from './components/forms/bulk_add_channel_form';
 import action_types from './action_types';
-
-const client = new Client4();
+import {manifest} from './manifest';
 
 export const getSiteURL = (state: GlobalState): string => {
     const config = getConfig(state);
@@ -30,12 +26,15 @@ export const getSiteURL = (state: GlobalState): string => {
     return basePath;
 };
 
+export const closeBulkAddChannelModal = () => {
+    return {
+        type: action_types.CLOSE_BULK_ADD_CHANNEL_MODAL,
+    };
+};
+
 export type BulkAddChannelEventResponse = {data?: any; error?: string};
 
-export const bulkAddToChannel = (payload: BulkAddChannelPayload) => async (dispatch, getState): Promise<BulkAddChannelEventResponse> => {
-    const state = getState();
-    const pluginServerRoute = getPluginServerRoute(state);
-
+export const bulkAddToChannel = async (payload: BulkAddChannelPayload): Promise<BulkAddChannelEventResponse> => {
     const formData = new FormData();
     formData.append('channel_id', payload.channel_id);
     formData.append('add_to_team', String(payload.add_to_team).toLowerCase());
@@ -44,7 +43,7 @@ export const bulkAddToChannel = (payload: BulkAddChannelPayload) => async (dispa
         formData.append('file', payload.file);
     }
 
-    return doFetchWithResponse(`${pluginServerRoute}/handlers/channel_bulk_add`, {
+    return doFetchWithResponse(`/plugins/${manifest.id}/handlers/channel_bulk_add`, {
         method: 'POST',
         body: formData,
     }).
@@ -66,19 +65,9 @@ export const openBulkAddChannelModal = (channelId: string): AnyAction => {
     };
 };
 
-export const closeBulkAddChannelModal = () => {
-    return {
-        type: action_types.CLOSE_BULK_ADD_CHANNEL_MODAL,
-    };
-};
-
 export type GetChannelResponse = {channel?: Channel | null; error?: string | null};
 
-export const getChannelInfo = (channelId: string) => async (dispatch, getState): Promise<GetChannelResponse> => {
-    const state = getState();
-    const siteURL = getSiteURL(state);
-    client.setUrl(siteURL);
-
+export const getChannelInfo = async (channelId: string): Promise<GetChannelResponse> => {
     try {
         const channel = await client.getChannel(channelId);
         return {channel, error: null};
