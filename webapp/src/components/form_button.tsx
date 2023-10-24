@@ -57,17 +57,4 @@ const FormButton = ({
     );
 };
 
-FormButton.propTypes = {
-    executing: PropTypes.bool,
-    executingMessage: PropTypes.node,
-    defaultMessage: PropTypes.node,
-    btnClass: PropTypes.string,
-    extraClasses: PropTypes.string,
-
-    id: PropTypes.string,
-    type: PropTypes.oneOf(['button', 'submit', 'reset']),
-    disabled: PropTypes.bool,
-    onClick: PropTypes.func,
-};
-
 export default FormButton;
