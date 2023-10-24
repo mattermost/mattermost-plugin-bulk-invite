@@ -1,4 +1,5 @@
-import { GlobalState } from '@mattermost/types/lib/store';
+import {GlobalState} from '@mattermost/types/lib/store';
+
 import {manifest} from './manifest';
 
 import {ReducerState} from './reducers';
