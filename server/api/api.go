@@ -10,12 +10,15 @@ import (
 	"github.com/mattermost/mattermost-plugin-bulk-invite/server/perror"
 )
 
-func Init(handler *Handler, engine *engine.Engine) {
-	apiV1Router := handler.Router.PathPrefix("/api/v1").Subrouter()
-	apiV1Router.HandleFunc(
-		"/bulk_add",
-		injectEngine(handler.apiBulkAddHandler, engine),
-	).Methods("POST")
+func Init(handler *Handler, engine *engine.Engine, debug bool) {
+	if debug {
+		// Enable debug route for testing
+		apiV1Router := handler.Router.PathPrefix("/api/v1").Subrouter()
+		apiV1Router.HandleFunc(
+			"/bulk_add",
+			injectEngine(handler.apiBulkAddHandler, engine),
+		).Methods("POST")
+	}
 
 	handlersRouter := handler.Router.PathPrefix("/handlers").Subrouter()
 	handlersRouter.HandleFunc(
@@ -67,6 +70,7 @@ func (bip *bulkAddChannelPayload) FromRequest(r *http.Request) *perror.PError {
 	return nil
 }
 
+// apiBulkAddHandler is a debug handler for testing
 func (h *Handler) apiBulkAddHandler(w http.ResponseWriter, r *http.Request, e *engine.Engine) {
 	userID := r.URL.Query().Get("user_id")
 
@@ -79,30 +83,10 @@ func (h *Handler) apiBulkAddHandler(w http.ResponseWriter, r *http.Request, e *e
 		return
 	}
 
-	if err := payload.IsValid(); err != nil {
-		sendResponse(w, withStatusCode(http.StatusBadRequest), withBody(`{"error": "%s"}`, err.Error()))
-		return
-	}
-
-	engineConfig := &engine.Config{
-		UserID:    userID,
-		ChannelID: payload.ChannelID,
-		AddToTeam: payload.AddToTeam,
-		Users:     payload.Users,
-	}
-
-	if err := e.StartJob(context.TODO(), engineConfig); err != nil {
-		sendResponse(w,
-			withHeader("Content-Type", "application/json"),
-			withStatusCode(http.StatusBadRequest),
-			withBody(err.AsJSON()),
-		)
-		return
-	}
-
-	sendResponse(w, withStatusCode(http.StatusCreated))
+	finishChannelBulkAddHandlers(w, payload, userID, e)
 }
 
+// channelBulkAddHandler is the handler for the channel bulk add route
 func (h *Handler) channelBulkAddHandler(w http.ResponseWriter, r *http.Request, e *engine.Engine) {
 	userID := getMattermostUserIDFromRequest(r)
 
@@ -127,6 +111,12 @@ func (h *Handler) channelBulkAddHandler(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
+	finishChannelBulkAddHandlers(w, payload, userID, e)
+}
+
+// finishChannelBulkAddHandlers finishes the channel bulk add handlers, chekcing the payload and
+// starting the job in the engine
+func finishChannelBulkAddHandlers(w http.ResponseWriter, payload bulkAddChannelPayload, userID string, e *engine.Engine) {
 	if err := payload.IsValid(); err != nil {
 		sendResponse(w, withStatusCode(http.StatusBadRequest), withBody(`{"error": "%s"}`, err.Error()))
 		return
@@ -144,7 +134,7 @@ func (h *Handler) channelBulkAddHandler(w http.ResponseWriter, r *http.Request, 
 		sendResponse(w,
 			withHeader("Content-Type", "application/json"),
 			withStatusCode(http.StatusBadRequest),
-			withBody(`{"error": "%s"}`, err.Message()),
+			withBody(err.AsJSON()),
 		)
 		return
 	}
