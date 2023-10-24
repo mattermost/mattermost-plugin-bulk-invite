@@ -3,8 +3,11 @@ import {manifest} from './manifest';
 
 import {ReducerState} from './reducers';
 
-const getPluginState = (state: GlobalState): ReducerState => state[`plugins-${manifest.id}`] || {};
+const pluginStateProperty = `plugins-${manifest.id}`;
+type GlobalStateWithPlugin = GlobalState & {[prop in typeof pluginStateProperty]: ReducerState};
 
-export const isBulkAddChannelModalVisible = (state: GlobalState) => getPluginState(state).bulkAddChannelModalVisible;
+const getPluginState = (state: GlobalStateWithPlugin): ReducerState => state[pluginStateProperty] || {};
 
-export const getBulkAddChannelModal = (state: GlobalState) => getPluginState(state).bulkAddChannelModal;
+export const isBulkAddChannelModalVisible = (state: GlobalStateWithPlugin) => getPluginState(state).bulkAddChannelModalVisible;
+
+export const getBulkAddChannelModal = (state: GlobalStateWithPlugin) => getPluginState(state).bulkAddChannelModal;
