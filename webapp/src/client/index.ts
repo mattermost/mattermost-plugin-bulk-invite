@@ -54,10 +54,5 @@ export const doFormFetchWithResponse = async (url: string, options: Options = {}
 };
 
 export const setupClient = (state: GlobalState) => {
-    const config = getConfig(state);
     client.setUrl(getSiteURL(state));
-
-    if (config && config.SiteURL) {
-        Client4.setUrl(config.SiteURL);
-    }
 };
