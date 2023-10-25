@@ -2,21 +2,25 @@ import {Store, Action} from 'redux';
 
 import {GlobalState} from '@mattermost/types/lib/store';
 
-import {useEffect} from 'react';
+import React, {useEffect} from 'react';
+
+import {GlobalState as ReduxGlobalState} from 'mattermost-redux/types/store';
 
 import {PluginRegistry} from '@/types/mattermost-webapp';
 
-import {openBulkAddChannelModal} from './actions';
 import {manifest} from './manifest';
-import reducers from './reducers';
+import reducers, {PluginAction} from './reducers';
 import BulkAddChannelModal from './components/modals/bulk_add_channel_modal';
+import {setupClient} from './client';
+import {openBulkAddChannelModal} from './actions';
 
 export default class Plugin {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-    public async initialize(registry: PluginRegistry, store: Store<GlobalState, Action<Record<string, unknown>>>) {
+    public async initialize(registry: PluginRegistry, store: Store<GlobalState, PluginAction>) {
         registry.registerReducer(reducers);
 
         const setup = async () => {
+            setupClient(store.getState() as any as ReduxGlobalState);
+
             registry.registerChannelHeaderMenuAction(
                 'Bulk invite',
                 async (channelID: string) => {

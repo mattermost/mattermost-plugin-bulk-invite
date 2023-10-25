@@ -3,8 +3,12 @@
     "target": "esnext",
     "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"],
-      "mattermost-redux/*": ["../node_modules/@mattermost/webapp/packages/mattermost-redux/src/*"],
+      "@/*": [
+        "src/*"
+      ],
+      "mattermost-redux/*": [
+        "../node_modules/@mattermost/webapp/packages/mattermost-redux/src/*"
+      ],
     },
     "lib": [
       "dom",
@@ -24,6 +28,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "experimentalDecorators": true,
+    "noImplicitAny": true,
     "jsx": "react"
   },
   "include": [

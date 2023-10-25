@@ -1,17 +1,22 @@
-import {combineReducers} from 'redux';
+import {Reducer, combineReducers} from 'redux';
 
 import action_types from './action_types';
 
-export const openBulkInviteChannelModal = (channelId: string) => {
-    return {
-        type: action_types.OPEN_BULK_ADD_CHANNEL_MODAL,
-        data: {
-            channelId,
-        },
-    };
+export type PluginAction = {
+    type: string;
+    data?: object;
 };
 
-const bulkAddChannelModalVisible = (state = false, action) => {
+type BulkAddChannelModalActionData = {
+    channelId?: string;
+};
+
+export type BulkAddChannelModalAction = {
+    type: string;
+    data?: BulkAddChannelModalActionData;
+};
+
+const bulkAddChannelModalVisible: Reducer<boolean, BulkAddChannelModalAction> = (state = false, action) => {
     switch (action.type) {
     case action_types.OPEN_BULK_ADD_CHANNEL_MODAL:
         return true;
@@ -22,11 +27,11 @@ const bulkAddChannelModalVisible = (state = false, action) => {
     }
 };
 
-const bulkAddChannelModal = (state = false, action) => {
+const bulkAddChannelModal: Reducer<BulkAddChannelModalActionData, BulkAddChannelModalAction> = (state = {}, action) => {
     switch (action.type) {
     case action_types.OPEN_BULK_ADD_CHANNEL_MODAL:
         return {
-            channelId: action.data.channelId,
+            channelId: action.data?.channelId,
         };
     case action_types.CLOSE_BULK_ADD_CHANNEL_MODAL:
         return {};
