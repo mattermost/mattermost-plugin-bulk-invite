@@ -26,8 +26,8 @@ export type BulkAddChannelPayload = {
 }
 
 export default function BulkAddChannelForm(props: Props) {
-    const modalProps = useSelector(getBulkAddChannelModal);
     const dispatch = useDispatch();
+    const modalProps = useSelector(getBulkAddChannelModal);
     const [storedError, setStoredError] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [channelName, setChannelName] = useState('');
@@ -38,8 +38,8 @@ export default function BulkAddChannelForm(props: Props) {
         channel_id: modalProps?.channelId || '',
     });
 
-    const loadChannelInfo = useCallback(async (channelId: string): Promise<Channel | null> => {
-        const response = (await dispatch(getChannelInfo(channelId)) as unknown as GetChannelResponse);
+    const loadChannelInfo = useCallback(async (channelId: string): Promise<Channel | null | undefined> => {
+        const response = await getChannelInfo(channelId);
 
         if (response.error) {
             return null;
@@ -48,7 +48,7 @@ export default function BulkAddChannelForm(props: Props) {
         return response.channel;
     }, []);
 
-    if (!channelName) {
+    if (!channelName && modalProps?.channelId) {
         loadChannelInfo(modalProps.channelId).then((channel) => {
             if (channel) {
                 setChannelName(channel.display_name);
@@ -63,7 +63,7 @@ export default function BulkAddChannelForm(props: Props) {
         }));
     };
 
-    const handleClose = (e?: Event) => {
+    const handleClose = (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         if (e && e.preventDefault) {
             e.preventDefault();
         }
@@ -83,7 +83,7 @@ export default function BulkAddChannelForm(props: Props) {
 
         setSubmitting(true);
 
-        const response = (await dispatch(bulkAddToChannel(formValues))) as BulkAddChannelEventResponse;
+        const response = await bulkAddToChannel(formValues);
         if (response.error) {
             handleError(response.error);
             return;
@@ -92,24 +92,20 @@ export default function BulkAddChannelForm(props: Props) {
         handleClose();
     };
 
-    const disableSubmit = false;
     const footer = (
         <React.Fragment>
             <FormButton
-                type='button'
-                btnClass='btn btn-tertiary'
                 defaultMessage='Cancel'
+                btnClass='btn-tertiary'
                 onClick={handleClose}
             />
             <FormButton
                 id='submit-button'
                 type='submit'
-                btnClass='btn btn-primary'
-                saving={submitting}
-                disabled={disableSubmit}
-            >
-                {'Start'}
-            </FormButton>
+                executing={submitting}
+                executingMessage='Adding users'
+                defaultMessage='Add users'
+            />
         </React.Fragment>
     );
 
@@ -120,7 +116,7 @@ export default function BulkAddChannelForm(props: Props) {
         />
     );
 
-    let error;
+    let error: React.ReactNode = null;
     if (storedError) {
         error = (
             <p className='alert alert-danger'>
@@ -154,7 +150,7 @@ export default function BulkAddChannelForm(props: Props) {
 
 type ActualFormProps = {
     formValues: BulkAddChannelPayload;
-    setFormValue: <Key extends keyof BulkAddChannelPayload>(name: Key, value: BulkAddChannelPayload[Key]) => Promise<{ error?: string }>;
+    setFormValue: <Key extends keyof BulkAddChannelPayload>(name: Key, value: BulkAddChannelPayload[Key]) => void;
 }
 
 const ActualForm = (props: ActualFormProps) => {

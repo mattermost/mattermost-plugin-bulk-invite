@@ -1,26 +1,14 @@
-import {getConfig} from 'mattermost-redux/selectors/entities/general';
+import {GlobalState} from '@mattermost/types/lib/store';
 
 import {manifest} from './manifest';
 
 import {ReducerState} from './reducers';
 
-const getPluginState = (state): ReducerState => state['plugins-' + manifest.id] || {};
+const pluginStateProperty = `plugins-${manifest.id}`;
+type GlobalStateWithPlugin = GlobalState & {[prop in typeof pluginStateProperty]: ReducerState};
 
-export const getPluginServerRoute = (state) => {
-    const config = getConfig(state);
+const getPluginState = (state: GlobalStateWithPlugin): ReducerState => state[pluginStateProperty] || {};
 
-    let basePath = '';
-    if (config && config.SiteURL) {
-        basePath = new URL(config.SiteURL).pathname;
+export const isBulkAddChannelModalVisible = (state: GlobalStateWithPlugin) => getPluginState(state).bulkAddChannelModalVisible;
 
-        if (basePath && basePath[basePath.length - 1] === '/') {
-            basePath = basePath.substr(0, basePath.length - 1);
-        }
-    }
-
-    return basePath + '/plugins/' + manifest.id;
-};
-
-export const isBulkAddChannelModalVisible = (state) => getPluginState(state).bulkAddChannelModalVisible;
-
-export const getBulkAddChannelModal = (state) => getPluginState(state).bulkAddChannelModal;
+export const getBulkAddChannelModal = (state: GlobalStateWithPlugin) => getPluginState(state).bulkAddChannelModal;
