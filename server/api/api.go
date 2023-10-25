@@ -10,6 +10,8 @@ import (
 	"github.com/mattermost/mattermost-plugin-bulk-invite/server/perror"
 )
 
+const maxFileSizeKiloBytes = 256
+
 func Init(handler *Handler, engine *engine.Engine, debug bool) {
 	if debug {
 		// Enable debug route for testing
