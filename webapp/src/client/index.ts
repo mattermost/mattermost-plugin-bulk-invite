@@ -1,6 +1,13 @@
 import {Client4} from 'mattermost-redux/client';
-import {ClientError} from 'mattermost-redux/client/client4';
 import {Options} from 'mattermost-redux/types/client4';
+import {ClientError} from 'mattermost-redux/client/client4';
+
+import {getConfig} from 'mattermost-redux/selectors/entities/general';
+import {GlobalState} from 'mattermost-redux/types/store';
+
+import {getSiteURL} from '@/actions';
+
+export const client = Client4;
 
 export const doFetch = async (url: string, options: Options) => {
     const {data} = await doFetchWithResponse(url, options);
@@ -44,4 +51,8 @@ export const doFormFetchWithResponse = async (url: string, options: Options = {}
         status_code: response.status,
         url,
     });
+};
+
+export const setupClient = (state: GlobalState) => {
+    client.setUrl(getSiteURL(state));
 };
