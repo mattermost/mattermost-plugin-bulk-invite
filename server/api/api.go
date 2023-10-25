@@ -10,6 +10,8 @@ import (
 	"github.com/mattermost/mattermost-plugin-bulk-invite/server/perror"
 )
 
+const maxFileSizeKiloBytes = 256
+
 func Init(handler *Handler, engine *engine.Engine) {
 	apiV1Router := handler.Router.PathPrefix("/api/v1").Subrouter()
 	apiV1Router.HandleFunc(
@@ -52,6 +54,10 @@ func (bip *bulkAddChannelPayload) FromRequest(r *http.Request) *perror.PError {
 		return perror.NewPError(err, "error parsing file")
 	}
 
+	if h.Size > maxFileSizeKiloBytes*1024 {
+		return perror.NewPError(fmt.Errorf("file too large"), fmt.Sprintf("File is too large. Max file size is %dKB.", maxFileSizeKiloBytes))
+	}
+
 	if h.Header.Get("Content-Type") != "application/json" {
 		return perror.NewPError(fmt.Errorf("invalid content type"), "Invalid file type, only JSON is supported")
 	}
@@ -88,6 +94,7 @@ func (h *Handler) apiBulkAddHandler(w http.ResponseWriter, r *http.Request, e *e
 		UserID:    userID,
 		ChannelID: payload.ChannelID,
 		AddToTeam: payload.AddToTeam,
+		AddGuests: payload.AddGuests,
 		Users:     payload.Users,
 	}
 
