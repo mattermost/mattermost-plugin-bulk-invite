@@ -2,14 +2,28 @@ import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
 import {Channel} from 'mattermost-redux/types/channels';
 
-import {AnyAction} from 'redux';
-
 import {GlobalState} from 'mattermost-redux/types/store';
 
 import {client, doFetchWithResponse} from './client';
 import {BulkAddChannelPayload} from './components/forms/bulk_add_channel_form';
 import action_types from './action_types';
 import {manifest} from './manifest';
+import {BulkAddChannelModalAction} from './reducers';
+
+export const openBulkAddChannelModal = (channelId: string): BulkAddChannelModalAction => {
+    return {
+        type: action_types.OPEN_BULK_ADD_CHANNEL_MODAL,
+        data: {
+            channelId,
+        },
+    };
+};
+
+export const closeBulkAddChannelModal = (): BulkAddChannelModalAction => {
+    return {
+        type: action_types.CLOSE_BULK_ADD_CHANNEL_MODAL,
+    };
+};
 
 export const getSiteURL = (state: GlobalState): string => {
     const config = getConfig(state);
@@ -24,12 +38,6 @@ export const getSiteURL = (state: GlobalState): string => {
     }
 
     return basePath;
-};
-
-export const closeBulkAddChannelModal = () => {
-    return {
-        type: action_types.CLOSE_BULK_ADD_CHANNEL_MODAL,
-    };
 };
 
 export type BulkAddChannelEventResponse = {data?: any; error?: string};
@@ -54,15 +62,6 @@ export const bulkAddToChannel = async (payload: BulkAddChannelPayload): Promise<
             const error = response.message?.error || 'An error occurred. Please check logs.';
             return {error};
         });
-};
-
-export const openBulkAddChannelModal = (channelId: string): AnyAction => {
-    return {
-        type: action_types.OPEN_BULK_ADD_CHANNEL_MODAL,
-        data: {
-            channelId,
-        },
-    };
 };
 
 export type GetChannelResponse = {channel?: Channel | null; error?: string | null};
