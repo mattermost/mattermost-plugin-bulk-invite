@@ -32,7 +32,7 @@ This plugin allows you to add users to a channel in bulk by uploading a JSON fil
 
 After successful installation:
 
-1. Craft a JSON file following the [following format](./.readme/template.json).
+1. Craft a JSON file following the [following format](./.readme/template.jsonc).
 2. Launch the plugin from the channel header or channel intro:
     - **Channel name > Bulk Invite**
 
@@ -45,7 +45,7 @@ After successful installation:
 
     ![Bulk invite modal](./.readme/bulk-invite-modal.png)
 
-    - **File**: Upload a JSON file following the [following format](./.readme/template.json).
+    - **File**: Upload a JSON file following the [following format](./.readme/template.jsonc).
     - **Invite members to the team**: If checked, the users will be added to the team if they are not already members. Otherwise they will be skipped.
     - **Invite guests**: If checked, guest users on the list will be added to the channel (and team if the above is checked). Otherwise they will be skipped.
 
