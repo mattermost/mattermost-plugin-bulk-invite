@@ -175,6 +175,7 @@ const ActualForm = (props: ActualFormProps) => {
                         }
                     }}
                     type='file'
+                    accept='.json'
                 />
             ),
         },
