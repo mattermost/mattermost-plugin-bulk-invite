@@ -36,10 +36,6 @@ func (e *Engine) checkPermissionsForUser(config *Config) *perror.PError {
 		if !e.API.HasPermissionToChannel(config.UserID, config.ChannelID, model.PermissionManagePublicChannelMembers) {
 			return perror.NewPError(fmt.Errorf("insufficient_public_channel_permissions__add_user"), "You dont have permission to add users to this channel")
 		}
-	case model.ChannelTypeGroup:
-		if !e.API.HasPermissionToChannel(config.UserID, config.ChannelID, model.PermissionManageCustomGroupMembers) {
-			return perror.NewPError(fmt.Errorf("insufficient_group_channel_permissions__add_user"), "You dont have permission to add users to this channel")
-		}
 	}
 
 	if config.AddToTeam && !e.API.HasPermissionToTeam(config.UserID, config.channel.TeamId, model.PermissionAddUserToTeam) {
@@ -66,6 +62,14 @@ func (e *Engine) StartJob(ctx context.Context, config *Config) *perror.PError {
 		return perror.NewPError(
 			fmt.Errorf("error getting channel: %w", appErr),
 			fmt.Sprintf("Error getting channel information. Does channel `%s` exist?", config.ChannelID),
+		)
+	}
+
+	// Only allow bulk operations in public and private channels
+	if config.channel.Type != model.ChannelTypePrivate && config.channel.Type != model.ChannelTypeOpen {
+		return perror.NewPError(
+			fmt.Errorf("channel_type_not_supported"),
+			"Only public and private channels are supported",
 		)
 	}
 
