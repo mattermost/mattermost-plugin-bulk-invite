@@ -112,6 +112,10 @@ func (e *Engine) start(_ context.Context, config *Config) {
 		if err := e.lockStore.Unlock(config.ChannelID); err != nil {
 			e.API.LogError("error unlocking channel. channel will be automatically unlocked after ttl expired", "channel_id", config.ChannelID, "err", err.Error())
 		}
+
+		if e.onFinish != nil {
+			e.onFinish()
+		}
 	}()
 
 	var appErr *model.AppError
@@ -150,10 +154,6 @@ func (e *Engine) start(_ context.Context, config *Config) {
 	}); err != nil {
 		e.API.LogError("error creating threaded result post in channel", "channel_id", config.ChannelID, "err", err.Error())
 		e.onError(config, err)
-	}
-
-	if e.onFinish != nil {
-		e.onFinish()
 	}
 }
 
