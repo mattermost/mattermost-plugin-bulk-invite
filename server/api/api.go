@@ -13,12 +13,6 @@ import (
 const maxFileSizeKiloBytes = 256
 
 func Init(handler *Handler, engine *engine.Engine) {
-	apiV1Router := handler.Router.PathPrefix("/api/v1").Subrouter()
-	apiV1Router.HandleFunc(
-		"/bulk_add",
-		injectEngine(handler.apiBulkAddHandler, engine),
-	).Methods("POST")
-
 	handlersRouter := handler.Router.PathPrefix("/handlers").Subrouter()
 	handlersRouter.HandleFunc(
 		"/channel_bulk_add",
@@ -71,43 +65,6 @@ func (bip *bulkAddChannelPayload) FromRequest(r *http.Request) *perror.PError {
 	bip.AddGuests = r.FormValue("add_guests") == "true"
 
 	return nil
-}
-
-func (h *Handler) apiBulkAddHandler(w http.ResponseWriter, r *http.Request, e *engine.Engine) {
-	userID := r.URL.Query().Get("user_id")
-
-	defer r.Body.Close()
-
-	var payload bulkAddChannelPayload
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		h.Logger.LogError("error parsing payload", "err", err.Error())
-		sendResponse(w, withStatusCode(http.StatusBadRequest), withBody(`{"error": "%s"}`, err.Error()))
-		return
-	}
-
-	if err := payload.IsValid(); err != nil {
-		sendResponse(w, withStatusCode(http.StatusBadRequest), withBody(`{"error": "%s"}`, err.Error()))
-		return
-	}
-
-	engineConfig := &engine.Config{
-		UserID:    userID,
-		ChannelID: payload.ChannelID,
-		AddToTeam: payload.AddToTeam,
-		AddGuests: payload.AddGuests,
-		Users:     payload.Users,
-	}
-
-	if err := e.StartJob(context.TODO(), engineConfig); err != nil {
-		sendResponse(w,
-			withHeader("Content-Type", "application/json"),
-			withStatusCode(http.StatusBadRequest),
-			withBody(err.AsJSON()),
-		)
-		return
-	}
-
-	sendResponse(w, withStatusCode(http.StatusCreated))
 }
 
 func (h *Handler) channelBulkAddHandler(w http.ResponseWriter, r *http.Request, e *engine.Engine) {
