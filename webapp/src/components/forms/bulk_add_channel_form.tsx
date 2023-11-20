@@ -210,7 +210,7 @@ const ActualForm = (props: ActualFormProps) => {
             required: false,
             helpText: (
                 <div>
-                    {'Add guests if they are present on the file. If this is unchecked guests wont be added to the team if the above setting is not checked.'}
+                    {'Adds guests, if they are present on the file. If unchecked, guests will not be added to the channel.'}
                 </div>
             ),
             element: (
