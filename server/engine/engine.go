@@ -18,6 +18,22 @@ type Engine struct {
 
 	// botUserID the bot user ID to set when sending messages
 	botUserID string
+
+	// onFinish is called when the bulk operation finishes. Mainly used for testing.
+	onFinish func()
+}
+
+func NewEngine(pluginAPI plugin.API, lockStore kvstore.LockStore, botUserID string) *Engine {
+	return &Engine{
+		API:       pluginAPI,
+		lockStore: lockStore,
+		botUserID: botUserID,
+	}
+}
+
+// SetOnFinish sets the function to be called when the bulk operation finishes. Mainly used for testing.
+func (e *Engine) SetOnFinish(f func()) {
+	e.onFinish = f
 }
 
 func (e *Engine) onError(config *Config, _ error) {
@@ -135,6 +151,10 @@ func (e *Engine) start(_ context.Context, config *Config) {
 		e.API.LogError("error creating threaded result post in channel", "channel_id", config.ChannelID, "err", err.Error())
 		e.onError(config, err)
 	}
+
+	if e.onFinish != nil {
+		e.onFinish()
+	}
 }
 
 func (e *Engine) addUserToChannelByUserID(config *Config, u AddUser, result *bulkChannelAddResult) error {
@@ -229,12 +249,4 @@ func (e *Engine) addUsersToChannel(config *Config) bulkChannelAddResult {
 	}
 
 	return result
-}
-
-func NewEngine(pluginAPI plugin.API, lockStore kvstore.LockStore, botUserID string) *Engine {
-	return &Engine{
-		API:       pluginAPI,
-		lockStore: lockStore,
-		botUserID: botUserID,
-	}
 }
