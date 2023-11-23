@@ -10,6 +10,12 @@ import (
 	"github.com/mattermost/mattermost-plugin-bulk-invite/server/kvstore"
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
+
+	root "github.com/mattermost/mattermost-plugin-bulk-invite"
+)
+
+var (
+	Manifest model.Manifest = root.Manifest
 )
 
 // Plugin implements the interface expected by the Mattermost server to communicate between the server and plugin processes.
@@ -80,6 +86,7 @@ func (p *Plugin) ensureBot() error {
 	}
 
 	botUser := &model.Bot{
+		OwnerId:     Manifest.Id, // Workaround to support older server version affected by https://github.com/mattermost/mattermost-server/pull/21560
 		Username:    "bulk-invite",
 		DisplayName: "Bulk Invite",
 		Description: "Bulk invite bot",
