@@ -46,6 +46,10 @@ func (e *Engine) checkPermissionsForUser(config *Config) *perror.PError {
 		return perror.NewPError(fmt.Errorf("insufficient_team_permissions__add_user"), "You dont have enough permissions to add users to this team")
 	}
 
+	if config.AddGuests && !e.API.HasPermissionToTeam(config.UserID, config.channel.TeamId, model.PermissionInviteGuest) {
+		return perror.NewPError(fmt.Errorf("insufficient_team_permissions__invite_guest"), "You dont have permission to invite guests to this team")
+	}
+
 	// TODO: Invite users to teams
 	// if !e.API.HasPermissionToTeam(config.UserID, config.channel.TeamId, model.PermissionInviteUser) {
 	// 	return perror.NewPError(fmt.Errorf("insufficient_team_permissions__invite_user"), "You dont have permission to invite users to this team")
