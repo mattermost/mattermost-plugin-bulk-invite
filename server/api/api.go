@@ -27,7 +27,7 @@ type bulkAddChannelPayload struct {
 	Users     []engine.AddUser `json:"users"`
 }
 
-func (bip *bulkAddChannelPayload) IsValid() error {
+func (bip *bulkAddChannelPayload) IsValid() *perror.PError {
 	if bip.ChannelID == "" {
 		return perror.NewPError(fmt.Errorf("missing channel_id"), "Channel ID is required.")
 	}
@@ -92,7 +92,7 @@ func (h *Handler) channelBulkAddHandler(w http.ResponseWriter, r *http.Request, 
 	}
 
 	if err := payload.IsValid(); err != nil {
-		sendResponse(w, withStatusCode(http.StatusBadRequest), withBody(`{"error": "%s"}`, err.Error()))
+		sendResponse(w, withStatusCode(http.StatusBadRequest), withBody(err.AsJSON()))
 		return
 	}
 
@@ -108,7 +108,7 @@ func (h *Handler) channelBulkAddHandler(w http.ResponseWriter, r *http.Request, 
 		sendResponse(w,
 			withHeader("Content-Type", "application/json"),
 			withStatusCode(http.StatusBadRequest),
-			withBody(`{"error": "%s"}`, err.Message()),
+			withBody(err.AsJSON()),
 		)
 		return
 	}
