@@ -6,6 +6,9 @@ import React, {useEffect} from 'react';
 
 import {GlobalState as ReduxGlobalState} from 'mattermost-redux/types/store';
 
+import {getCurrentChannel} from 'mattermost-redux/selectors/entities/channels';
+import Constants from 'mattermost-redux/constants/general';
+
 import {PluginRegistry} from '@/types/mattermost-webapp';
 
 import {manifest} from './manifest';
@@ -25,6 +28,10 @@ export default class Plugin {
                 'Bulk invite',
                 async (channelID: string) => {
                     store.dispatch(openBulkAddChannelModal(channelID));
+                },
+                () => {
+                    const currentChannel = getCurrentChannel(store.getState());
+                    return ![Constants.DM_CHANNEL, Constants.GM_CHANNEL].includes(currentChannel.type);
                 },
             );
 
