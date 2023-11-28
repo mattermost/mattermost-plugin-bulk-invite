@@ -18,6 +18,22 @@ type Engine struct {
 
 	// botUserID the bot user ID to set when sending messages
 	botUserID string
+
+	// onFinish is called when the bulk operation finishes. Mainly used for testing.
+	onFinish func()
+}
+
+func NewEngine(pluginAPI plugin.API, lockStore kvstore.LockStore, botUserID string) *Engine {
+	return &Engine{
+		API:       pluginAPI,
+		lockStore: lockStore,
+		botUserID: botUserID,
+	}
+}
+
+// SetOnFinish sets the function to be called when the bulk operation finishes. Mainly used for testing.
+func (e *Engine) SetOnFinish(f func()) {
+	e.onFinish = f
 }
 
 func (e *Engine) onError(config *Config, _ error) {
@@ -35,10 +51,6 @@ func (e *Engine) checkPermissionsForUser(config *Config) *perror.PError {
 	case model.ChannelTypeOpen:
 		if !e.API.HasPermissionToChannel(config.UserID, config.ChannelID, model.PermissionManagePublicChannelMembers) {
 			return perror.NewPError(fmt.Errorf("insufficient_public_channel_permissions__add_user"), "You dont have permission to add users to this channel")
-		}
-	case model.ChannelTypeGroup:
-		if !e.API.HasPermissionToChannel(config.UserID, config.ChannelID, model.PermissionManageCustomGroupMembers) {
-			return perror.NewPError(fmt.Errorf("insufficient_group_channel_permissions__add_user"), "You dont have permission to add users to this channel")
 		}
 	}
 
@@ -73,6 +85,14 @@ func (e *Engine) StartJob(ctx context.Context, config *Config) *perror.PError {
 		)
 	}
 
+	// Only allow bulk operations in public and private channels
+	if config.channel.Type != model.ChannelTypePrivate && config.channel.Type != model.ChannelTypeOpen {
+		return perror.NewPError(
+			fmt.Errorf("channel_type_not_supported"),
+			"Only public and private channels are supported",
+		)
+	}
+
 	if err := e.checkPermissionsForUser(config); err != nil {
 		return perror.NewPError(
 			fmt.Errorf("insufficient permissions: %w", err),
@@ -95,6 +115,10 @@ func (e *Engine) start(_ context.Context, config *Config) {
 	defer func() {
 		if err := e.lockStore.Unlock(config.ChannelID); err != nil {
 			e.API.LogError("error unlocking channel. channel will be automatically unlocked after ttl expired", "channel_id", config.ChannelID, "err", err.Error())
+		}
+
+		if e.onFinish != nil {
+			e.onFinish()
 		}
 	}()
 
@@ -229,12 +253,4 @@ func (e *Engine) addUsersToChannel(config *Config) bulkChannelAddResult {
 	}
 
 	return result
-}
-
-func NewEngine(pluginAPI plugin.API, lockStore kvstore.LockStore, botUserID string) *Engine {
-	return &Engine{
-		API:       pluginAPI,
-		lockStore: lockStore,
-		botUserID: botUserID,
-	}
 }

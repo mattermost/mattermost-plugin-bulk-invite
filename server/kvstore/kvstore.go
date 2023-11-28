@@ -1,5 +1,7 @@
 // Copyright (c) 2017-present Mattermost, Inc. All Rights Reserved.
 // See License for license information.
+//go:generate mockgen -destination=../mocks/mock_kvstore.go -package=mocks github.com/mattermost/mattermost-plugin-bulk-invite/server/kvstore KVStore
+//go:generate mockgen -destination=../mocks/mock_lockstore.go -package=mocks github.com/mattermost/mattermost-plugin-bulk-invite/server/kvstore LockStore
 
 package kvstore
 
