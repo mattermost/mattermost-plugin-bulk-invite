@@ -1,7 +1,8 @@
 const exec = require('child_process').exec;
-const webpack = require('webpack');
 
 const path = require('path');
+
+const webpack = require('webpack');
 
 const PLUGIN_ID = require('../plugin.json').id;
 
@@ -10,8 +11,8 @@ const isDev = NPM_TARGET === 'debug' || NPM_TARGET === 'debug:watch';
 
 const plugins = [
     new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ? process.env.NODE_ENV : ''),
-    })
+        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ? process.env.NODE_ENV : ''), // eslint-disable-line no-process-env
+    }),
 ];
 if (NPM_TARGET === 'build:watch' || NPM_TARGET === 'debug:watch') {
     plugins.push({
