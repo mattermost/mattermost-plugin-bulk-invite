@@ -22,7 +22,7 @@ export default class Plugin {
 
     public async initialize(registry: PluginRegistry, store: Store<GlobalState, PluginAction>) {
         const setup = async () => {
-            setupClient(store.getState() as any as ReduxGlobalState);
+            setupClient(store.getState() as unknown as ReduxGlobalState);
 
             registry.registerChannelHeaderMenuAction(
                 'Bulk invite',
@@ -30,7 +30,7 @@ export default class Plugin {
                     store.dispatch(openBulkAddChannelModal(channelID));
                 },
                 () => {
-                    const currentChannel = getCurrentChannel(store.getState());
+                    const currentChannel = getCurrentChannel(store.getState() as unknown as ReduxGlobalState);
                     return ![Constants.DM_CHANNEL, Constants.GM_CHANNEL].includes(currentChannel.type);
                 },
             );
