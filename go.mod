@@ -3,9 +3,9 @@ module github.com/mattermost/mattermost-plugin-bulk-invite
 go 1.20
 
 require (
-	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/mux v1.8.1
 	github.com/jellydator/ttlcache/v3 v3.1.0
-	github.com/mattermost/mattermost/server/public v0.0.9
+	github.com/mattermost/mattermost/server/public v0.0.10
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/mock v0.3.0
@@ -22,7 +22,6 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
-	github.com/graph-gophers/graphql-go v1.5.1-0.20230110080634-edea822f558a // indirect
 	github.com/hashicorp/go-hclog v1.5.0 // indirect
 	github.com/hashicorp/go-plugin v1.4.10 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
