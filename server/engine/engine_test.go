@@ -20,7 +20,6 @@ func newValidEmptyConfig() *Config {
 		UserID:    "user-id",
 		Users:     []AddUser{},
 		AddToTeam: false,
-		AddGuests: false,
 	}
 }
 
