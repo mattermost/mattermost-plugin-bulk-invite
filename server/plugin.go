@@ -10,6 +10,7 @@ import (
 	"github.com/mattermost/mattermost-plugin-bulk-invite/server/kvstore"
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
+	"github.com/mattermost/mattermost/server/public/pluginapi"
 
 	root "github.com/mattermost/mattermost-plugin-bulk-invite"
 )
@@ -40,6 +41,13 @@ type Plugin struct {
 }
 
 func (p *Plugin) OnActivate() error {
+	config := p.API.GetConfig()
+	license := p.API.GetLicense()
+
+	if !pluginapi.IsEnterpriseLicensedOrDevelopment(config, license) {
+		return fmt.Errorf("this plugin requires an Enterprise license")
+	}
+
 	return nil
 }
 
