@@ -23,7 +23,6 @@ func Init(handler *Handler, engine *engine.Engine) {
 type bulkAddChannelPayload struct {
 	ChannelID string           `json:"channel_id"`
 	AddToTeam bool             `json:"add_to_team"`
-	AddGuests bool             `json:"add_guests"`
 	Users     []engine.AddUser `json:"users"`
 }
 
@@ -62,7 +61,6 @@ func (bip *bulkAddChannelPayload) FromRequest(r *http.Request) *perror.PError {
 
 	bip.ChannelID = r.FormValue("channel_id")
 	bip.AddToTeam = r.FormValue("add_to_team") == "true"
-	bip.AddGuests = r.FormValue("add_guests") == "true"
 
 	return nil
 }
@@ -100,7 +98,6 @@ func (h *Handler) channelBulkAddHandler(w http.ResponseWriter, r *http.Request, 
 		UserID:    userID,
 		ChannelID: payload.ChannelID,
 		AddToTeam: payload.AddToTeam,
-		AddGuests: payload.AddGuests,
 		Users:     payload.Users,
 	}
 

@@ -46,7 +46,6 @@ export const bulkAddToChannel = async (payload: BulkAddChannelPayload): Promise<
     const formData = new FormData();
     formData.append('channel_id', payload.channel_id);
     formData.append('add_to_team', String(payload.add_to_team).toLowerCase());
-    formData.append('add_guests', String(payload.add_guests).toLowerCase());
     if (payload.file) {
         formData.append('file', payload.file);
     }
