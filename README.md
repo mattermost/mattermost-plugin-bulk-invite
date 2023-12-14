@@ -5,6 +5,8 @@
 [![Release](https://img.shields.io/github/v/release/mattermost/mattermost-plugin-bulk-invite)](https://github.com/mattermost/mattermost-plugin-bulk-invite/releases/latest)
 [![HW](https://img.shields.io/github/issues/mattermost/mattermost-plugin-bulk-invite/Up%20For%20Grabs?color=dark%20green&label=Help%20Wanted)](https://github.com/mattermost/mattermost-plugin-bulk-invite/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Up+For+Grabs%22+label%3A%22Help+Wanted%22)
 
+> ℹ️ **Not recommended for production use without Mattermost guidance. Please reach out to your Customer Success Manager to learn more.**
+
 This plugin allows you to add users to a channel in bulk by uploading a JSON file.
 
 ## License
