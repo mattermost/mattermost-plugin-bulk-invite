@@ -10,6 +10,13 @@ import (
 	"github.com/mattermost/mattermost-plugin-bulk-invite/server/kvstore"
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
+	"github.com/mattermost/mattermost/server/public/pluginapi"
+
+	root "github.com/mattermost/mattermost-plugin-bulk-invite"
+)
+
+var (
+	Manifest model.Manifest = root.Manifest
 )
 
 const enableDebugRoute = false
@@ -36,6 +43,13 @@ type Plugin struct {
 }
 
 func (p *Plugin) OnActivate() error {
+	config := p.API.GetConfig()
+	license := p.API.GetLicense()
+
+	if !pluginapi.IsEnterpriseLicensedOrDevelopment(config, license) {
+		return fmt.Errorf("this plugin requires an Enterprise license")
+	}
+
 	return nil
 }
 
@@ -82,6 +96,7 @@ func (p *Plugin) ensureBot() error {
 	}
 
 	botUser := &model.Bot{
+		OwnerId:     Manifest.Id, // Workaround to support older server version affected by https://github.com/mattermost/mattermost-server/pull/21560
 		Username:    "bulk-invite",
 		DisplayName: "Bulk Invite",
 		Description: "Bulk invite bot",

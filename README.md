@@ -5,14 +5,23 @@
 [![Release](https://img.shields.io/github/v/release/mattermost/mattermost-plugin-bulk-invite)](https://github.com/mattermost/mattermost-plugin-bulk-invite/releases/latest)
 [![HW](https://img.shields.io/github/issues/mattermost/mattermost-plugin-bulk-invite/Up%20For%20Grabs?color=dark%20green&label=Help%20Wanted)](https://github.com/mattermost/mattermost-plugin-bulk-invite/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22Up+For+Grabs%22+label%3A%22Help+Wanted%22)
 
+> **Not recommended for production use without Mattermost guidance. Please reach out to your Customer Success Manager to learn more.**
+
 This plugin allows you to add users to a channel in bulk by uploading a JSON file.
+
+## License
+
+This repository is licensed under the [Mattermost Source Available License](LICENSE) and requires a valid Enterprise Edition License when used for production. See [frequently asked questions](https://docs.mattermost.com/overview/faq.html#mattermost-source-available-license) to learn more.
+
+Although a valid Mattermost Enterprise Edition License is required if using this plugin in production, the [Mattermost Source Available License](LICENSE) allows you to compile and test this plugin in development and testing environments without a Mattermost Enterprise Edition License. As such, we welcome community contributions to this plugin.
+
+If you're running an Enterprise Edition of Mattermost and don't already have a valid license, you can obtain a trial license from **System Console > Edition and License**. If you're running the Team Edition of Mattermost, including when you run the server directly from source, you may instead configure your server to enable both testing (`ServiceSettings.EnableTesting`) and developer mode (`ServiceSettings.EnableDeveloper`). These settings are not recommended in production environments.
 
 ## Features
 
 - Allows adding users to a channel in bulk by uploading a JSON file.
     - Supports using `user_id` and `username`.
 - (Optionally) Adds the users to the team if they don't belong to it.
-- (Optionally) Invite guest users too, if provied.
 
 ## Installation
 
@@ -32,7 +41,7 @@ This plugin allows you to add users to a channel in bulk by uploading a JSON fil
 
 After successful installation:
 
-1. Craft a JSON file following the [following format](./.readme/template.json).
+1. Craft a JSON file following the [following format](./.readme/template.jsonc).
 2. Launch the plugin from the channel header or channel intro:
     - **Channel name > Bulk Invite**
 
@@ -45,9 +54,8 @@ After successful installation:
 
     ![Bulk invite modal](./.readme/bulk-invite-modal.png)
 
-    - **File**: Upload a JSON file following the [following format](./.readme/template.json).
+    - **File**: Upload a JSON file following the [following format](./.readme/template.jsonc).
     - **Invite members to the team**: If checked, the users will be added to the team if they are not already members. Otherwise they will be skipped.
-    - **Invite guests**: If checked, guest users on the list will be added to the channel (and team if the above is checked). Otherwise they will be skipped.
 
 4. The plugin will display it's progress in the channel:
 

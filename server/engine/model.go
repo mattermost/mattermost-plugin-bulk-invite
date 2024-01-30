@@ -69,10 +69,4 @@ type Config struct {
 
 	// AddToTeam add users to the team if they do not belong to it
 	AddToTeam bool
-
-	// AddGuests add guests to the team and channel if they do not belong to it
-	AddGuests bool
-
-	// inviteToWorkspace invite the users by email to the workspace if they are not registered
-	// inviteToWorkspace bool
 }

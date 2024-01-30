@@ -6,6 +6,9 @@ import React, {useEffect} from 'react';
 
 import {GlobalState as ReduxGlobalState} from 'mattermost-redux/types/store';
 
+import {getCurrentChannel} from 'mattermost-redux/selectors/entities/channels';
+import Constants from 'mattermost-redux/constants/general';
+
 import {PluginRegistry} from '@/types/mattermost-webapp';
 
 import {manifest} from './manifest';
@@ -15,29 +18,43 @@ import {setupClient} from './client';
 import {openBulkAddChannelModal} from './actions';
 
 export default class Plugin {
-    public async initialize(registry: PluginRegistry, store: Store<GlobalState, PluginAction>) {
-        registry.registerReducer(reducers);
+    private setupUIFinished = false;
 
+    public async initialize(registry: PluginRegistry, store: Store<GlobalState, PluginAction>) {
         const setup = async () => {
-            setupClient(store.getState() as any as ReduxGlobalState);
+            setupClient(store.getState() as unknown as ReduxGlobalState);
 
             registry.registerChannelHeaderMenuAction(
                 'Bulk invite',
                 async (channelID: string) => {
                     store.dispatch(openBulkAddChannelModal(channelID));
                 },
+                () => {
+                    const currentChannel = getCurrentChannel(store.getState() as unknown as ReduxGlobalState);
+                    return ![Constants.DM_CHANNEL, Constants.GM_CHANNEL].includes(currentChannel.type);
+                },
             );
 
             registry.registerRootComponent(BulkAddChannelModal);
+
+            this.setupUIFinished = true;
         };
 
-        registry.registerRootComponent(() => <SetupUI setup={setup}/>);
+        registry.registerReducer(reducers);
+        registry.registerRootComponent(() => (
+            <SetupUI
+                setup={setup}
+                setupUIFinished={this.setupUIFinished}
+            />
+        ));
     }
 }
 
-const SetupUI = ({setup}: { setup: () => Promise<void> }) => {
+const SetupUI = ({setup, setupUIFinished}: { setup: () => Promise<void>, setupUIFinished: boolean }) => {
     useEffect(() => {
-        setup();
+        if (!setupUIFinished) {
+            setup();
+        }
     }, []);
 
     return null;

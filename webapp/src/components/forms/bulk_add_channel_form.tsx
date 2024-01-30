@@ -19,7 +19,6 @@ type Props = {
 
 export type BulkAddChannelPayload = {
     add_to_team: boolean;
-    add_guests: boolean;
     file?: File
     users: string[];
     channel_id: string;
@@ -33,7 +32,6 @@ export default function BulkAddChannelForm(props: Props) {
     const [channelName, setChannelName] = useState('');
     const [formValues, setFormValues] = useState<BulkAddChannelPayload>({
         add_to_team: false,
-        add_guests: false,
         users: [],
         channel_id: modalProps?.channelId || '',
     });
@@ -175,6 +173,7 @@ const ActualForm = (props: ActualFormProps) => {
                         }
                     }}
                     type='file'
+                    accept='.json'
                 />
             ),
         },
@@ -201,26 +200,6 @@ const ActualForm = (props: ActualFormProps) => {
 
                     // disabled={teamAddDisabled}
                     type='checkbox'
-                />
-            ),
-        },
-        {
-            label: 'Add guests',
-            required: false,
-            helpText: (
-                <div>
-                    {'Add guests if they are present on the file. If this is unchecked guests wont be added to the team if the above setting is not checked.'}
-                </div>
-            ),
-            element: (
-                <input
-                    id='bulk-add-channel-add-guests'
-                    onChange={(e) => {
-                        setFormValue('add_guests', e.target.checked);
-                    }}
-                    value={String(formValues.add_guests)}
-                    type='checkbox'
-                    checked={formValues.add_guests}
                 />
             ),
         },

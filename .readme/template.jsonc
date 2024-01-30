@@ -1,10 +1,15 @@
 {
     "users": [
+        // Put one object in this array per user
+        // Only one field is required here, user_id takes preference over username if both are provided
         {
-            // Only one field is required here, user_id takes preference over username if both are provided
-            // One entry per user
             "user_id": "user1_id",
             "username": "user1"
-        }
+        },
+        {
+            "user_id": "user2_id",
+            "username": "user2"
+        },
+        // ...
     ]
 }

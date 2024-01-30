@@ -18,6 +18,22 @@ type Engine struct {
 
 	// botUserID the bot user ID to set when sending messages
 	botUserID string
+
+	// onFinish is called when the bulk operation finishes. Mainly used for testing.
+	onFinish func()
+}
+
+func NewEngine(pluginAPI plugin.API, lockStore kvstore.LockStore, botUserID string) *Engine {
+	return &Engine{
+		API:       pluginAPI,
+		lockStore: lockStore,
+		botUserID: botUserID,
+	}
+}
+
+// SetOnFinish sets the function to be called when the bulk operation finishes. Mainly used for testing.
+func (e *Engine) SetOnFinish(f func()) {
+	e.onFinish = f
 }
 
 func (e *Engine) onError(config *Config, _ error) {
@@ -36,20 +52,11 @@ func (e *Engine) checkPermissionsForUser(config *Config) *perror.PError {
 		if !e.API.HasPermissionToChannel(config.UserID, config.ChannelID, model.PermissionManagePublicChannelMembers) {
 			return perror.NewPError(fmt.Errorf("insufficient_public_channel_permissions__add_user"), "You dont have permission to add users to this channel")
 		}
-	case model.ChannelTypeGroup:
-		if !e.API.HasPermissionToChannel(config.UserID, config.ChannelID, model.PermissionManageCustomGroupMembers) {
-			return perror.NewPError(fmt.Errorf("insufficient_group_channel_permissions__add_user"), "You dont have permission to add users to this channel")
-		}
 	}
 
 	if config.AddToTeam && !e.API.HasPermissionToTeam(config.UserID, config.channel.TeamId, model.PermissionAddUserToTeam) {
 		return perror.NewPError(fmt.Errorf("insufficient_team_permissions__add_user"), "You dont have enough permissions to add users to this team")
 	}
-
-	// TODO: Invite users to teams
-	// if !e.API.HasPermissionToTeam(config.UserID, config.channel.TeamId, model.PermissionInviteUser) {
-	// 	return perror.NewPError(fmt.Errorf("insufficient_team_permissions__invite_user"), "You dont have permission to invite users to this team")
-	// }
 
 	return nil
 }
@@ -66,6 +73,14 @@ func (e *Engine) StartJob(ctx context.Context, config *Config) *perror.PError {
 		return perror.NewPError(
 			fmt.Errorf("error getting channel: %w", appErr),
 			fmt.Sprintf("Error getting channel information. Does channel `%s` exist?", config.ChannelID),
+		)
+	}
+
+	// Only allow bulk operations in public and private channels
+	if config.channel.Type != model.ChannelTypePrivate && config.channel.Type != model.ChannelTypeOpen {
+		return perror.NewPError(
+			fmt.Errorf("channel_type_not_supported"),
+			"Only public and private channels are supported",
 		)
 	}
 
@@ -91,6 +106,10 @@ func (e *Engine) start(_ context.Context, config *Config) {
 	defer func() {
 		if err := e.lockStore.Unlock(config.ChannelID); err != nil {
 			e.API.LogError("error unlocking channel. channel will be automatically unlocked after ttl expired", "channel_id", config.ChannelID, "err", err.Error())
+		}
+
+		if e.onFinish != nil {
+			e.onFinish()
 		}
 	}()
 
@@ -166,7 +185,7 @@ func (e *Engine) addToChannel(userID string, config *Config, result *bulkChannel
 	}
 
 	// Check if user is guest
-	if user.IsGuest() && !config.AddGuests {
+	if user.IsGuest() {
 		e.API.LogInfo("not inviting guest user", "add_user_id", userID, "trigger_user_id", config.UserID, "channel_id", config.ChannelID)
 		result.notAddedGuest++
 		return nil
@@ -225,12 +244,4 @@ func (e *Engine) addUsersToChannel(config *Config) bulkChannelAddResult {
 	}
 
 	return result
-}
-
-func NewEngine(pluginAPI plugin.API, lockStore kvstore.LockStore, botUserID string) *Engine {
-	return &Engine{
-		API:       pluginAPI,
-		lockStore: lockStore,
-		botUserID: botUserID,
-	}
 }
