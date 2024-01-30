@@ -89,6 +89,12 @@ func (h *Handler) channelBulkAddHandler(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
+	finishChannelBulkAddHandlers(w, payload, userID, e)
+}
+
+// finishChannelBulkAddHandlers finishes the channel bulk add handlers, chekcing the payload and
+// starting the job in the engine
+func finishChannelBulkAddHandlers(w http.ResponseWriter, payload bulkAddChannelPayload, userID string, e *engine.Engine) {
 	if err := payload.IsValid(); err != nil {
 		sendResponse(w, withStatusCode(http.StatusBadRequest), withBody(err.AsJSON()))
 		return

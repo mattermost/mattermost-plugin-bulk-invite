@@ -8,14 +8,14 @@ type PError struct {
 }
 
 func (e *PError) Error() string {
-	if e.err == nil {
+	if e.err != nil {
 		return e.err.Error()
 	}
 	return ""
 }
 
-func (e *PError) String() string {
-	return e.Error()
+func (e *PError) Err() error {
+	return e.err
 }
 
 func (e *PError) Message() string {

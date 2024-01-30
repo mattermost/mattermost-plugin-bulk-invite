@@ -19,6 +19,8 @@ var (
 	Manifest model.Manifest = root.Manifest
 )
 
+const enableDebugRoute = false
+
 // Plugin implements the interface expected by the Mattermost server to communicate between the server and plugin processes.
 type Plugin struct {
 	plugin.MattermostPlugin
@@ -76,7 +78,7 @@ func (p *Plugin) OnConfigurationChange() error {
 	p.engine = engine.NewEngine(p.API, lockStore, p.botUserID)
 
 	p.handler = api.NewHandler(p.API)
-	api.Init(p.handler, p.engine)
+	api.Init(p.handler, p.engine, enableDebugRoute)
 
 	return nil
 }
