@@ -3,12 +3,12 @@ module github.com/mattermost/mattermost-plugin-bulk-invite
 go 1.20
 
 require (
-	github.com/gorilla/mux v1.8.0
-	github.com/jellydator/ttlcache/v3 v3.1.0
+	github.com/gorilla/mux v1.8.1
+	github.com/jellydator/ttlcache/v3 v3.2.0
 	github.com/mattermost/mattermost/server/public v0.0.9
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.8.4
-	go.uber.org/mock v0.3.0
+	github.com/stretchr/testify v1.9.0
+	go.uber.org/mock v0.4.0
 )
 
 require (
@@ -40,7 +40,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/stretchr/objx v0.5.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/tinylib/msgp v1.1.8 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
