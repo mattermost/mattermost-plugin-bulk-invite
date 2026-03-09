@@ -1,8 +1,8 @@
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
-import {Channel} from 'mattermost-redux/types/channels';
+import {Channel} from '@mattermost/types/channels';
 
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from '@mattermost/types/store';
 
 import {client, doFetchWithResponse} from './client';
 import {BulkAddChannelPayload} from './components/forms/bulk_add_channel_form';

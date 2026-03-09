@@ -1,10 +1,10 @@
 import {Store, Action} from 'redux';
 
-import {GlobalState} from '@mattermost/types/lib/store';
+import {GlobalState} from '@mattermost/types/store';
 
 import React, {useEffect} from 'react';
 
-import {GlobalState as ReduxGlobalState} from 'mattermost-redux/types/store';
+import {GlobalState as ReduxGlobalState} from '@mattermost/types/store';
 
 import {getCurrentChannel} from 'mattermost-redux/selectors/entities/channels';
 import Constants from 'mattermost-redux/constants/general';

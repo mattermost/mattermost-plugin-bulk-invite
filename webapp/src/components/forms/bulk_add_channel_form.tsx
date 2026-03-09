@@ -3,7 +3,7 @@ import {useSelector, useDispatch} from 'react-redux';
 
 import {Modal} from 'react-bootstrap';
 
-import {Channel} from 'mattermost-redux/types/channels';
+import {Channel} from '@mattermost/types/channels';
 
 import FormButton from '../form_button';
 import {BulkAddChannelEventResponse, GetChannelResponse, bulkAddToChannel, getChannelInfo} from '@/actions';

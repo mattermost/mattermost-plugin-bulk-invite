@@ -1,9 +1,18 @@
 import {Client4} from 'mattermost-redux/client';
-import {Options} from 'mattermost-redux/types/client4';
-import {ClientError} from 'mattermost-redux/client/client4';
+import {Options} from '@mattermost/types/client4';
 
-import {getConfig} from 'mattermost-redux/selectors/entities/general';
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from '@mattermost/types/store';
+
+class ClientError extends Error {
+    url: string;
+    status_code: number;
+
+    constructor(baseUrl: string, data: {message: string; status_code: number; url: string}) {
+        super(data.message);
+        this.url = data.url;
+        this.status_code = data.status_code;
+    }
+}
 
 import {getSiteURL} from '@/actions';
 
