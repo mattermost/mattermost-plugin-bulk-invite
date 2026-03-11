@@ -3,17 +3,6 @@ import {Options} from '@mattermost/types/client4';
 
 import {GlobalState} from '@mattermost/types/store';
 
-class ClientError extends Error {
-    url: string;
-    status_code: number;
-
-    constructor(baseUrl: string, data: {message: string; status_code: number; url: string}) {
-        super(data.message);
-        this.url = data.url;
-        this.status_code = data.status_code;
-    }
-}
-
 import {getSiteURL} from '@/actions';
 
 export const client = Client4;
@@ -36,11 +25,7 @@ export const doFetchWithResponse = async (url: string, options: Options = {}) =>
         };
     }
 
-    throw new ClientError(Client4.url, {
-        message: data || '',
-        status_code: response.status,
-        url,
-    });
+    throw new Error(data || '');
 };
 
 export const doFormFetchWithResponse = async (url: string, options: Options = {}) => {
@@ -55,11 +40,7 @@ export const doFormFetchWithResponse = async (url: string, options: Options = {}
         };
     }
 
-    throw new ClientError(Client4.url, {
-        message: data || '',
-        status_code: response.status,
-        url,
-    });
+    throw new Error(data || '');
 };
 
 export const setupClient = (state: GlobalState) => {
