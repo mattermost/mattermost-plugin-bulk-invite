@@ -1,10 +1,8 @@
-import {Store, Action} from 'redux';
+import {Store} from 'redux';
 
-import {GlobalState} from '@mattermost/types/store';
+import {GlobalState, GlobalState as ReduxGlobalState} from '@mattermost/types/store';
 
 import React, {useEffect} from 'react';
-
-import {GlobalState as ReduxGlobalState} from '@mattermost/types/store';
 
 import {getCurrentChannel} from 'mattermost-redux/selectors/entities/channels';
 import Constants from 'mattermost-redux/constants/general';
@@ -31,7 +29,11 @@ export default class Plugin {
                 },
                 () => {
                     const currentChannel = getCurrentChannel(store.getState() as unknown as ReduxGlobalState);
-                    return ![Constants.DM_CHANNEL, Constants.GM_CHANNEL].includes(currentChannel.type);
+                    if (!currentChannel) {
+                        return false;
+                    }
+                    const directChannelTypes: string[] = [Constants.DM_CHANNEL, Constants.GM_CHANNEL];
+                    return !directChannelTypes.includes(currentChannel.type);
                 },
             );
 

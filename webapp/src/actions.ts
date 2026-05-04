@@ -40,7 +40,7 @@ export const getSiteURL = (state: GlobalState): string => {
     return basePath;
 };
 
-export type BulkAddChannelEventResponse = {data?: any; error?: string};
+export type BulkAddChannelEventResponse = {data?: unknown; error?: string};
 
 export const bulkAddToChannel = async (payload: BulkAddChannelPayload): Promise<BulkAddChannelEventResponse> => {
     const formData = new FormData();
@@ -69,8 +69,9 @@ export const getChannelInfo = async (channelId: string): Promise<GetChannelRespo
     try {
         const channel = await client.getChannel(channelId);
         return {channel, error: null};
-    } catch (e: any) {
-        const error = e.message?.error || 'An error occurred while retrieving channel information.';
+    } catch (e) {
+        const message = (e as {message?: {error?: string}}).message;
+        const error = message?.error || 'An error occurred while retrieving channel information.';
         return {channel: null, error};
     }
 };
