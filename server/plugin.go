@@ -11,12 +11,6 @@ import (
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/mattermost/mattermost/server/public/pluginapi"
-
-	root "github.com/mattermost/mattermost-plugin-bulk-invite"
-)
-
-var (
-	Manifest model.Manifest = root.Manifest
 )
 
 // Plugin implements the interface expected by the Mattermost server to communicate between the server and plugin processes.
@@ -58,7 +52,7 @@ func (p *Plugin) OnDeactivate() error {
 // OnConfigurationChange is invoked when configuration changes may have been made.
 func (p *Plugin) OnConfigurationChange() error {
 	p.API.LogDebug("config change")
-	var configuration = new(configuration)
+	configuration := new(configuration)
 
 	// Load the public configuration fields from the Mattermost server configuration.
 	if err := p.API.LoadPluginConfiguration(configuration); err != nil {
@@ -94,7 +88,7 @@ func (p *Plugin) ensureBot() error {
 	}
 
 	botUser := &model.Bot{
-		OwnerId:     Manifest.Id, // Workaround to support older server version affected by https://github.com/mattermost/mattermost-server/pull/21560
+		OwnerId:     manifest.Id, // Workaround to support older server version affected by https://github.com/mattermost/mattermost-server/pull/21560
 		Username:    "bulk-invite",
 		DisplayName: "Bulk Invite",
 		Description: "Bulk invite bot",

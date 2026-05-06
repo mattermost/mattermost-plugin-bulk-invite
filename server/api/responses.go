@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -25,9 +24,9 @@ func withHeader(key, value string) responseOption {
 	}
 }
 
-func withBody(body string, args ...any) responseOption {
+func withBody(body string) responseOption {
 	return func(w http.ResponseWriter) {
-		_, _ = w.Write([]byte(fmt.Sprintf(body, args...)))
+		_, _ = w.Write([]byte(body))
 	}
 }
 

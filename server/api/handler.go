@@ -20,8 +20,8 @@ func NewHandler(pluginAPI plugin.API) *Handler {
 		Logger: pluginAPI,
 	}
 
-	h.Router.HandleFunc("{anything:.*}", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(404)
+	h.HandleFunc("{anything:.*}", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
 	})
 	return h
 }

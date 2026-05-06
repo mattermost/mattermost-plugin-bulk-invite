@@ -7,7 +7,7 @@ import {GlobalState} from '@mattermost/types/store';
 import {client, doFetchWithResponse} from './client';
 import {BulkAddChannelPayload} from './components/forms/bulk_add_channel_form';
 import action_types from './action_types';
-import {manifest} from './manifest';
+import manifest from './manifest';
 import {BulkAddChannelModalAction} from './reducers';
 
 export const openBulkAddChannelModal = (channelId: string): BulkAddChannelModalAction => {
