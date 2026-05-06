@@ -70,7 +70,17 @@ export const getChannelInfo = async (channelId: string): Promise<GetChannelRespo
         const channel = await client.getChannel(channelId);
         return {channel, error: null};
     } catch (e) {
-        const message = (e as {message?: {error?: string}}).message;
+        const defaultError = {channel: null, error: 'An error occurred while retrieving channel information.'};
+        
+       if (typeof e !== 'object' || !e || !('message' in e)) {
+           return defaultError;
+       }
+       
+       if (typeof e.message !== 'object' || !e.message || !('error' in e.message) || (typeof e.message.error !== 'string') {
+           return defaultError;
+       }
+       
+       return {channel: null, error: e.message.error};
         const error = message?.error || 'An error occurred while retrieving channel information.';
         return {channel: null, error};
     }
