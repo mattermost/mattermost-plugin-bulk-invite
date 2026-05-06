@@ -1,9 +1,7 @@
 import {Client4} from 'mattermost-redux/client';
-import {Options} from 'mattermost-redux/types/client4';
-import {ClientError} from 'mattermost-redux/client/client4';
+import {Options} from '@mattermost/types/client4';
 
-import {getConfig} from 'mattermost-redux/selectors/entities/general';
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from '@mattermost/types/store';
 
 import {getSiteURL} from '@/actions';
 
@@ -27,11 +25,7 @@ export const doFetchWithResponse = async (url: string, options: Options = {}) =>
         };
     }
 
-    throw new ClientError(Client4.url, {
-        message: data || '',
-        status_code: response.status,
-        url,
-    });
+    throw new Error(data || '');
 };
 
 export const doFormFetchWithResponse = async (url: string, options: Options = {}) => {
@@ -46,11 +40,7 @@ export const doFormFetchWithResponse = async (url: string, options: Options = {}
         };
     }
 
-    throw new ClientError(Client4.url, {
-        message: data || '',
-        status_code: response.status,
-        url,
-    });
+    throw new Error(data || '');
 };
 
 export const setupClient = (state: GlobalState) => {

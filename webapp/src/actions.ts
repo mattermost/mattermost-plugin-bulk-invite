@@ -1,8 +1,8 @@
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
-import {Channel} from 'mattermost-redux/types/channels';
+import {Channel} from '@mattermost/types/channels';
 
-import {GlobalState} from 'mattermost-redux/types/store';
+import {GlobalState} from '@mattermost/types/store';
 
 import {client, doFetchWithResponse} from './client';
 import {BulkAddChannelPayload} from './components/forms/bulk_add_channel_form';
@@ -40,7 +40,7 @@ export const getSiteURL = (state: GlobalState): string => {
     return basePath;
 };
 
-export type BulkAddChannelEventResponse = {data?: any; error?: string};
+export type BulkAddChannelEventResponse = {data?: unknown; error?: string};
 
 export const bulkAddToChannel = async (payload: BulkAddChannelPayload): Promise<BulkAddChannelEventResponse> => {
     const formData = new FormData();
@@ -69,8 +69,17 @@ export const getChannelInfo = async (channelId: string): Promise<GetChannelRespo
     try {
         const channel = await client.getChannel(channelId);
         return {channel, error: null};
-    } catch (e: any) {
-        const error = e.message?.error || 'An error occurred while retrieving channel information.';
-        return {channel: null, error};
+    } catch (e) {
+        const defaultError = {channel: null, error: 'An error occurred while retrieving channel information.'};
+
+        if (typeof e !== 'object' || !e || !('message' in e)) {
+            return defaultError;
+        }
+
+        if (typeof e.message !== 'object' || !e.message || !('error' in e.message) || typeof e.message.error !== 'string') {
+            return defaultError;
+        }
+
+        return {channel: null, error: e.message.error};
     }
 };

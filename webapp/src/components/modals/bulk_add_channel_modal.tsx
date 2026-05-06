@@ -8,11 +8,9 @@ import {isBulkAddChannelModalVisible} from '@/selectors';
 import BulkAddChannelForm from '../forms/bulk_add_channel_form';
 import {closeBulkAddChannelModal} from '@/actions';
 
-type Props = {};
-
 import './bulk_add_channel_modal.scss';
 
-export default function BulkAddChannelModal(props: Props) {
+export default function BulkAddChannelModal() {
     const visible = useSelector(isBulkAddChannelModalVisible);
 
     const dispatch = useDispatch();
@@ -24,7 +22,6 @@ export default function BulkAddChannelModal(props: Props) {
 
     const content = (
         <BulkAddChannelForm
-            {...props}
             close={close}
         />
     );

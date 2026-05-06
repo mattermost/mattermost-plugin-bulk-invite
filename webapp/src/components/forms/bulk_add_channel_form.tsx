@@ -1,12 +1,12 @@
 import React, {useCallback, useState} from 'react';
-import {useSelector, useDispatch} from 'react-redux';
+import {useSelector} from 'react-redux';
 
 import {Modal} from 'react-bootstrap';
 
-import {Channel} from 'mattermost-redux/types/channels';
+import {Channel} from '@mattermost/types/channels';
 
 import FormButton from '../form_button';
-import {BulkAddChannelEventResponse, GetChannelResponse, bulkAddToChannel, getChannelInfo} from '@/actions';
+import {bulkAddToChannel, getChannelInfo} from '@/actions';
 
 import {getBulkAddChannelModal} from '@/selectors';
 import {Props as FormComponentProps, FormComponent} from '../form_component';
@@ -25,7 +25,6 @@ export type BulkAddChannelPayload = {
 }
 
 export default function BulkAddChannelForm(props: Props) {
-    const dispatch = useDispatch();
     const modalProps = useSelector(getBulkAddChannelModal);
     const [storedError, setStoredError] = useState('');
     const [submitting, setSubmitting] = useState(false);

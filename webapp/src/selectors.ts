@@ -1,4 +1,4 @@
-import {GlobalState} from '@mattermost/types/lib/store';
+import {GlobalState} from '@mattermost/types/store';
 
 import {manifest} from './manifest';
 

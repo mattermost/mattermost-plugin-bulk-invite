@@ -1,12 +1,18 @@
 import React from 'react';
 
+type ElementProps = {
+    id?: string;
+    type?: string;
+    disabled?: boolean;
+};
+
 export type Props = {
     label: React.ReactNode;
-    element: React.ReactElement;
-    helpText?: JSX.Element;
+    element: React.ReactElement<ElementProps>;
+    helpText?: React.JSX.Element;
     required?: boolean;
     hideRequiredStar?: boolean;
-    disabledText?: JSX.Element;
+    disabledText?: React.JSX.Element;
     type?: string;
 }
 
