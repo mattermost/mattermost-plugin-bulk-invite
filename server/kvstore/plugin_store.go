@@ -25,7 +25,7 @@ func NewPluginStore(api plugin.API) KVStore {
 func NewPluginStoreWithExpiry(api plugin.API, ttl time.Duration) KVStore {
 	return &pluginStore{
 		api:        api,
-		ttlSeconds: (int64)(ttl / time.Second),
+		ttlSeconds: int64(ttl / time.Second),
 	}
 }
 

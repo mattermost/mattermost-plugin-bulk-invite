@@ -68,7 +68,7 @@ func (bip *bulkAddChannelPayload) FromRequest(r *http.Request) *perror.PError {
 func (h *Handler) channelBulkAddHandler(w http.ResponseWriter, r *http.Request, e *engine.Engine) {
 	userID := getMattermostUserIDFromRequest(r)
 
-	defer r.Body.Close()
+	defer func() { _ = r.Body.Close() }()
 
 	// Do not parse data in memory
 	if err := r.ParseMultipartForm(0); err != nil {
@@ -81,7 +81,8 @@ func (h *Handler) channelBulkAddHandler(w http.ResponseWriter, r *http.Request, 
 
 	if err := payload.FromRequest(r); err != nil {
 		h.Logger.LogError("error parsing channel bulk add form payload", "err", err.Error())
-		sendResponse(w,
+		sendResponse(
+			w,
 			withHeader("Content-Type", "application/json"),
 			withStatusCode(http.StatusBadRequest),
 			withBody(err.AsJSON()),
@@ -102,7 +103,8 @@ func (h *Handler) channelBulkAddHandler(w http.ResponseWriter, r *http.Request, 
 	}
 
 	if err := e.StartJob(context.TODO(), engineConfig); err != nil {
-		sendResponse(w,
+		sendResponse(
+			w,
 			withHeader("Content-Type", "application/json"),
 			withStatusCode(http.StatusBadRequest),
 			withBody(err.AsJSON()),

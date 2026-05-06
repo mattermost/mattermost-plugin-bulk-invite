@@ -9,7 +9,7 @@ import Constants from 'mattermost-redux/constants/general';
 
 import {PluginRegistry} from '@/types/mattermost-webapp';
 
-import {manifest} from './manifest';
+import manifest from './manifest';
 import reducers, {PluginAction} from './reducers';
 import BulkAddChannelModal from './components/modals/bulk_add_channel_modal';
 import {setupClient} from './client';

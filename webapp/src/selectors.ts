@@ -1,6 +1,6 @@
 import {GlobalState} from '@mattermost/types/store';
 
-import {manifest} from './manifest';
+import manifest from './manifest';
 
 import {ReducerState} from './reducers';
 
